@@ -40,7 +40,7 @@ The results and their respective visualisations are stored in a results director
 with each phylotype and their relative frequencies as proportions of the full repertoire in the given 
 genome; a heat map with dendrogram showing either absolute VAP variation or deviation from the 
 mean, using our pilot dataset; and a Principal Component Analysis (PCA) plot showing variation 
-distribution in the given sample compared to our pilot dataset.
+distribution in the given sample compared to our pilot dataset containing isolates described by Silva Pereira et al. (2018) and Tihon et al. (2017).
 
 Transcriptomic VAP
 At the transcriptomic level the tool takes two NGS paired reads, maps the transcripts and estimates 
@@ -169,3 +169,8 @@ Vap.py 	- parses command line parameters and selects pathways accordingly
 	
 
   
+References:
+
+Silva Pereira, S. et al. (2018) Variant antigen repertoires in Trypanosoma congolense populations and experimental infections can be profiled from deep sequence data with a set of universal protein motifs. 
+
+Tihon, E. et al. (2017) Discovery and genomic analyses of hybridization between divergent lineages of Trypanosoma congolense, causative agent of Animal African Trypanosomiasis. Mol Ecol. 26(23):6524-6538. doi: 10.1111/mec.14271. Epub 2017 Aug 24.
