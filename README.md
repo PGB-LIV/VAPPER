@@ -38,7 +38,7 @@ calculates their relative abundances. Should the genome be already assembled the
 be indicated using the optional [-con] command line parameter.
 The results and their respective visualisations are stored in a results directory and include a table 
 with each phylotype and their relative frequencies as proportions of the full repertoire in the given 
-genome; a heat map with dendogram showing either absolute VAP variation or deviation from the 
+genome; a heat map with dendrogram showing either absolute VAP variation or deviation from the 
 mean, using our pilot dataset; and a Principal Component Analysis (PCA) plot showing variation 
 distribution in the given sample compared to our pilot dataset.
 
@@ -52,7 +52,7 @@ T.vivax:
 The approach for T. vivax is quite different, it relies on the presence/absence of clusters of orthologs 
 (COGs). It takes paired sequencing read files in fastq format and outputs a binary matrix of the 
 presence/absence of each COG/gene for a given sample.
-The results compare this matrix with a database of 20 isolates and a heatmap and dendrogram are 
+The results compare this matrix with a database of 27+ isolates; a heatmap and dendrogram are 
 provided for comparison.
 
 
