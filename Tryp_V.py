@@ -1,3 +1,21 @@
+"""
+ * Copyright 2018 University of Liverpool
+ * Author John Heap, Computational Biology Facility, UoL
+ * Based on original scripts of Sara Silva Silva Pereira, Institute of Infection and Global Health, UoL
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+"""
 import matplotlib as mpl
 mpl.use('Agg')
 
@@ -14,27 +32,22 @@ from matplotlib.patches import Patch
 import seaborn as sns
 
 def assembleWithVelvet(name, kmers, inslen, covcut, fastq1name,fastq2name):
-    #argString = "velveth " + name + "_k65 65 -shortPaired -fastq " + name + "_R1.fastq " + name + "_R2.fastq"
     argString = "velveth " + name + "_k"+ kmers+" "+ kmers + " -shortPaired -fastq " + fastq1name+" "+fastq2name
     print(argString)
     returncode = subprocess.call(argString, shell=True)
     if returncode != 0:
         return "Error in velveth"
     argString = "velvetg " + name + "_k"+kmers+" -exp_cov auto -ins_length "+inslen+" -clean yes -ins_length_sd 50 -min_pair_count 20"
-    #argString = "velvetg " + name + "_k"+kmers+" -exp_cov auto -ins_length "+inslen+" -cov_cutoff "+covcut+" -clean yes -ins_length_sd 50 -min_pair_count 20"
-    #argString = "velvetg " + name + "_k65 -exp_cov auto -ins_length 400 -cov_cutoff 5 -clean yes -ins_length_sd 50 -min_pair_count 20"+quietString
     print(argString)
     returncode = subprocess.call(argString, shell = True)
     if returncode != 0:
         return "Error in velvetg"
     shutil.copyfile(name + "_k"+kmers+"//contigs.fa",name + ".fa")  # my $namechange = "mv ".$input."_k65/contigs.fa ".$input.".fa";
+    shutil.rmtree(name+"_k"+kmers)  #remove test_k65 directory
     return "ok"
 
 
 def blastContigs(test_name,database):
-    print(test_name)
-    print(database)
-    #db_path = os.path.dirname(os.path.realpath(__file__))+database
     db_path = database
     argString = "blastn -db "+db_path+" -query "+test_name+".fa -outfmt 10 -out "+test_name+"_blast.txt"
     print (argString)
@@ -42,13 +55,11 @@ def blastContigs(test_name,database):
     if returncode != 0:
         return "Error in blastall"
     blast_df = pd.read_csv(""+test_name+"_blast.txt")
-    #print (blast_df)
-    #if ($temp[2] >= 98 & & $temp[3] > 100 & & $temp[10] < 0.001){
-    #'qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore'
     blast_df.columns = ['qaccver', 'saccver', 'pident', 'length', 'mismatch', 'gapopen', 'qstart', 'qend', 'sstart', 'send', 'evalue','bitscore']
     blastResult_df = blast_df[(blast_df['pident']>=98) & (blast_df['length'] > 100) & (blast_df['evalue']<0.001) ]
     blastResult_df = blastResult_df[['qaccver', 'saccver', 'pident']]   #query accession.version, subject accession.version, Percentage of identical matches
-
+    os.remove(test_name+"_blast.txt")
+    #os.remove(test_name+".fa")
     return blastResult_df
 
 
@@ -60,8 +71,7 @@ def getCogsPresent(blastResult_df,strain,cogOrBinList):
     cogSet = set(cogList)   #get unique values
     cogList = sorted(cogSet)    #sort them
 
-    #print (cogList)
-    #print (len(cogList))
+
 
     thereList = []
     dataList = []
@@ -77,8 +87,7 @@ def getCogsPresent(blastResult_df,strain,cogOrBinList):
             else:
                 thereList.append('0')
 
-    #print (thereList)
-    #print (cnt)
+
     data = {'Cog': dataList, strain: thereList}
     presence_df = pd.DataFrame(data)
     #print (presence_df)
@@ -90,33 +99,36 @@ def addToCurrentData(cog_df, name):
     tv_df = pd.read_csv(j_fname)
 
     cogList = cog_df[name].tolist()
-    #cogList.insert(0,'Test')
-    #print (len(tv_df))
-    #print(len(cogList))
 
-    #print(cogList)
     tv_df.loc[:,name]=cogList
     return tv_df
 
 
-
-
-def createClusterMap(tv_df,name,html_path,pdfExport):
+def create_V_MultiClusterMap(tv_df,nameList,name,html_path,pdf):
     #Retrieve Data
     dir_path = os.path.dirname(os.path.realpath(__file__))
     j_fname = dir_path+r"/data/vivax/geoTv.csv"
     geo_df = pd.read_csv(j_fname)
-    geo_df.loc[len(geo_df)] =[name,name,'k']
-    print(geo_df)
+    for j in range(len(nameList)):
+        nm = nameList[j]
+        if '/' in nm:
+            nm = nm.split('/')[1]
+        nm = nm.split('.')[0]
+        geo_df.loc[len(geo_df)] =[nm,nm,'k']
+    #print(geo_df)
 
     myStrains = tv_df.columns.values.tolist()   #beware first entry is COG
     myStrains = myStrains[1:]
-    print(myStrains)
+    #print(myStrains)
     myPal = []
     for s in myStrains:
+        if '/' in s:
+            s = s.split('/')[1]
+        s = s.split('.')[0]
+
         col = geo_df[(geo_df['Strain'] == s)]['colour'].tolist()
         myPal.append(col[0])
-    print(myPal)
+    #print(myPal)
     mycogmap = ['skyblue', 'orangered']  # blue absent,red present
     tv_df.set_index('COG', inplace=True)
     tv_df = tv_df[tv_df.columns].astype(float)
@@ -130,17 +142,16 @@ def createClusterMap(tv_df,name,html_path,pdfExport):
 
     labs = ax.xaxis.get_ticklabels()
     for i in range(0, len(labs)):
-        print(labs[i])
+        #print(labs[i])
+        label = labs[i].get_text()
+        if '/' in label:
+            label = label.split('/')[1]
+        label = label.split('.')[0]
         # labs[i].set_text("       "+labs[i].get_text())  #make enough room so label sits atop of col_color bars
-        newlabs.append("       " + labs[i].get_text())
+        newlabs.append("       " + label)
+        #newlabs.append("       " + labs[i].get_text())
     ax.xaxis.set_ticklabels(newlabs)
 
-    #labs = ax.xaxis.get_ticklabels()
-    #for i in range(0, len(labs)):
-    #    print(labs[i])
-    #    labs[i].set_text("       "+labs[i].get_text())  #make enough room so label sits atop of col_color bars
-    #    print(labs[i])
-    #ax.xaxis.set_ticklabels(labs)
     plt.setp(cg.ax_heatmap.xaxis.get_ticklabels(), rotation=90)  # get x labels printed vertically
 
     cg.cax.set_visible(False)
@@ -150,7 +161,7 @@ def createClusterMap(tv_df,name,html_path,pdfExport):
     ax = cg.ax_heatmap
     # ax.set_title("Variant antigen profiles of T. vivax genomes.\nDendrogram reflects the VSG repertoire relationships of each strain inferred by the presence and absence of non-universal T. vivax VSG orthologs.", va = "top", wrap = "True")
     b = len(tv_df)
-    print(b)
+    #print(b)
     title = "Figure Legend: The Variant Antigen Profiles of $\itTrypanosoma$ $\itvivax$ " \
             "showing the \ncombination of present and absent diagnostic cluster of VSG orthologs " \
             "across the sample cohort. \nDendrogram reflects the relationships amongst the VSG" \
@@ -164,37 +175,98 @@ def createClusterMap(tv_df,name,html_path,pdfExport):
     col = cg.ax_col_dendrogram.get_position()
     cg.ax_col_dendrogram.set_position([col.x0, col.y0*1.08, col.width, col.height*1.1])
 
-
+    countryList = pd.unique(geo_df['Location'])
+    colourList = pd.unique(geo_df['colour'])
     legend_elements = [Patch(facecolor='orangered', label='COG Present'),
-                       Patch (facecolor='skyblue', label='COG Absent'),
-                       Patch(facecolor='w', label=''),
-                       Patch (facecolor='b', label='Nigeria'),
-                       Patch(facecolor = 'g', label='Uganda'),
-                       Patch (facecolor='c', label='Gambia'),
-                       Patch (facecolor='r', label='Ivory Coast'),
-                       Patch(facecolor='m', label='Brazil'),
-                       Patch(facecolor='k', label=name)]
-    #legend_test = [[Patch(facecolor='orangered'),Patch(facecolor='r')],["test","test2"]]
+                       Patch(facecolor='skyblue', label='COG Absent')]
+
+    for i in range(0, len(colourList)):
+        #print("country = %s, colour = %s" % (countryList[i], colourList[i]))
+        p = Patch(facecolor=str(colourList[i]), label=countryList[i])
+        legend_elements.append(p)
+
     ax.legend(handles = legend_elements, bbox_to_anchor=(-0.3,1.2),loc = 'upper left')
 
-
-
-
-
-
-
-    #plt.setp(cg.ax_heatmap.yaxis.get_ticklabels(), rotation=0 )  # get y labels printed horizontally
-    # cg.dendrogram_col.linkage  # linkage matrix for columns
-    # cg.dendrogram_row.linkage  # linkage matrix for rows
-    # plt.savefig(r"results/" + name + "_heatmap.png")
-    #plt.savefig(htmlresource + "/heatmap.png")
-    #if pdf == 'PDF_Yes':
-    #    plt.savefig(htmlresource + "/heatmap.pdf")
-        # shutil.copyfile("heatmap.pdf",heatmapfn)  #
-    #plt.legend()
     fname = html_path+"/"+name+"_clustermap.png"
     cg.savefig(fname)
-    if pdfExport == 'PDF_Yes':
+    if pdf == 'PDF_Yes':
+        fname = html_path + "/" + name + "_clustermap.pdf"
+        cg.savefig(fname)
+    #plt.show()
+
+
+def createClusterMap(tv_df,name,html_path,pdf):
+    #Retrieve Data
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    j_fname = dir_path+r"/data/vivax/geoTv.csv"
+    geo_df = pd.read_csv(j_fname)
+    geo_df.loc[len(geo_df)] =[name,name,'k']
+    #print(geo_df)
+
+    myStrains = tv_df.columns.values.tolist()   #beware first entry is COG
+    myStrains = myStrains[1:]
+    #print(myStrains)
+    myPal = []
+    for s in myStrains:
+        col = geo_df[(geo_df['Strain'] == s)]['colour'].tolist()
+        myPal.append(col[0])
+    #print(myPal)
+    mycogmap = ['skyblue', 'orangered']  # blue absent,red present
+    tv_df.set_index('COG', inplace=True)
+    tv_df = tv_df[tv_df.columns].astype(float)
+
+    cg = sns.clustermap(tv_df, method='ward', col_colors=myPal, cmap=mycogmap, yticklabels = 1500, row_cluster=False, linewidths = 0)
+    #cg = sns.clustermap(tv_df, method='ward', row_cluster=False, linewidths = 0)
+    ax = cg.ax_heatmap
+    #xasix ticks and labels.
+    ax.xaxis.tick_top()     #set ticks at top
+    newlabs = []
+
+    labs = ax.xaxis.get_ticklabels()
+    for i in range(0, len(labs)):
+        #print(labs[i])
+        # labs[i].set_text("       "+labs[i].get_text())  #make enough room so label sits atop of col_color bars
+        newlabs.append("       " + labs[i].get_text())
+    ax.xaxis.set_ticklabels(newlabs)
+
+    plt.setp(cg.ax_heatmap.xaxis.get_ticklabels(), rotation=90)  # get x labels printed vertically
+
+    cg.cax.set_visible(False)
+    ax = cg.ax_heatmap
+    ax.set_yticklabels("")
+    ax.set_ylabel("")
+    ax = cg.ax_heatmap
+    # ax.set_title("Variant antigen profiles of T. vivax genomes.\nDendrogram reflects the VSG repertoire relationships of each strain inferred by the presence and absence of non-universal T. vivax VSG orthologs.", va = "top", wrap = "True")
+    b = len(tv_df)
+    #print(b)
+    title = "Figure Legend: The Variant Antigen Profiles of $\itTrypanosoma$ $\itvivax$ " \
+            "showing the \ncombination of present and absent diagnostic cluster of VSG orthologs " \
+            "across the sample cohort. \nDendrogram reflects the relationships amongst the VSG" \
+            " repertoires of each strain. " \
+            "Strains were isolated \nfrom multiple African countries as shown in the key.\nData was produced with the " \
+            "'Variant Antigen Profiler' (Silva Pereira and Jackson, 2018)."
+
+    ax.text(-1.5, len(tv_df) + 8,
+            title,
+            ha="left", va="top", wrap="True")
+    col = cg.ax_col_dendrogram.get_position()
+    cg.ax_col_dendrogram.set_position([col.x0, col.y0*1.08, col.width, col.height*1.1])
+
+    #need to take the panel colours from geo.df
+    countryList = pd.unique(geo_df['Location'])
+    colourList = pd.unique(geo_df['colour'])
+    legend_elements = [Patch(facecolor='orangered', label='COG Present'),
+                       Patch (facecolor='skyblue', label='COG Absent')]
+
+    for i in range(0,len(colourList)):
+        #print("country = %s, colour = %s" %(countryList[i],colourList[i]))
+        p = Patch(facecolor = str(colourList[i]),label = countryList[i])
+        legend_elements.append(p)
+
+    ax.legend(handles = legend_elements, bbox_to_anchor=(-0.3,1.2),loc = 'upper left')
+    fname = html_path+"/"+name+"_clustermap.png"
+    cg.savefig(fname)
+    if pdf == 'PDF_Yes':
         fname = html_path + "/" + name + "_clustermap.pdf"
         cg.savefig(fname)
     #plt.show()
@@ -208,72 +280,98 @@ def createHTML(name,htmlfn,htmlPath):
     htmlString += r'<p> <h3>The Heat Map and Dendrogram</h3></p>'
     imgString = r"<img src = '"+name+"_clustermap.png' alt='Cog Clustermap' style='max-width:100%'><br><br>"
     htmlString += imgString
-    print(htmlString)
+    #print(htmlString)
 
     with open(htmlfn, "w") as htmlfile:
         htmlfile.write(htmlString)
 
+def create_V_MultiHTML(name,htmlfn,htmlPath):
+    #assumes imgs are heatmap.png, dheatmap.png, vapPCA.png and already in htmlresource
+    htmlString = r"<html><title>T.vivax VAP</title><body><div style='text-align:center'><h2><i>Trypanosoma vivax</i> Variant Antigen Profile</h2><h3>"
+    htmlString += name
 
-def vivax_assemble(args,dict):
-    #argdict = {'name': 2, 'pdfexport': 3, 'kmers': 4, 'inslen': 5, 'covcut': 6, 'forward': 7, 'reverse': 8, 'html_file': 9,'html_resource': 10}
-    #assembleWithVelvet("V2_Test", '65', '400', '5', "data/TviBrRp.1.clean", "data/TviBrRp.2.clean")
 
+    htmlString += r'<p> <h3>The Heat Map and Dendrogram</h3></p>'
+    imgString = r"<img src = '"+name+"_clustermap.png' alt='Cog Clustermap' style='max-width:100%'><br><br>"
+    htmlString += imgString
+    #print(htmlString)
+
+    with open(htmlPath+"/"+htmlfn, "w") as htmlfile:
+        htmlfile.write(htmlString)
+
+def vivax_assemble(dict):
     vivaxPath = os.path.dirname(os.path.realpath(__file__))+r"/data/vivax"
-    assembleWithVelvet(args[dict['name']], args[dict['kmers']], args[dict['inslen']], args[dict['covcut']],
-                       args[dict['forward']], args[dict['reverse']])
-    blastResult_df = blastContigs(args[dict['name']], vivaxPath+r"/Database/COGs.fas")
-    orthPresence_df = getCogsPresent(blastResult_df, args[dict['name']], vivaxPath+r"/Database/COGlist.txt")
+    assembleWithVelvet(dict['name'], dict['kmers'], dict['inslen'], dict['covcut'],
+                       dict['forward'], dict['reverse'])
+    blastResult_df = blastContigs(dict['name'], vivaxPath+r"/Database/COGs.fas")
+    orthPresence_df = getCogsPresent(blastResult_df, dict['name'], vivaxPath+r"/Database/COGlist.txt")
 
-    binBlastResult_df = blastContigs(args[dict['name']], vivaxPath+r"/Database/Bin_2.fas")
-    binPresence_df = getCogsPresent(binBlastResult_df, args[dict['name']], vivaxPath+r"/Database/binlist.txt")
+    binBlastResult_df = blastContigs(dict['name'], vivaxPath+r"/Database/Bin_2.fas")
+    binPresence_df = getCogsPresent(binBlastResult_df, dict['name'], vivaxPath+r"/Database/binlist.txt")
     cogPresence_df = orthPresence_df.append(binPresence_df, ignore_index=True)
 
-    fname = args[dict['html_resource']] +args[dict['name']]+"_cogspresent.csv"
+    fname = dict['html_resource'] +dict['name']+"_cogspresent.csv"
     cogPresence_df.to_csv(fname)
-    current_df = addToCurrentData(cogPresence_df,args[dict['name']])  # load in Tvdatabase and add cogPresence column to it.
-    createClusterMap(current_df, args[dict['name']],args[dict['html_resource']],args[dict['pdfexport']])
-    createHTML(args[dict['name']],args[dict['html_file']],args[dict['html_resource']])
+    current_df = addToCurrentData(cogPresence_df,dict['name'])  # load in Tvdatabase and add cogPresence column to it.
+    createClusterMap(current_df, dict['name'],dict['html_resource'],dict['pdf'])
+    createHTML(dict['name'],dict['html_file'],dict['html_resource'])
 
-def test_cluster(args,dict):
-    print ("name: %s",args[dict['name']])
+def test_cluster(dict):
+    print ("name: %s",dict['name'])
     cogPresence_df = pd.read_csv("test_cogspresent.csv")
-    print(cogPresence_df)
-    current_df = addToCurrentData(cogPresence_df,args[dict['name']])  # load in Tvdatabase and add cogPresence column to it.
-    createClusterMap(current_df, args[dict['name']], args[dict['html_resource']], args[dict['pdfexport']])
+    #print(cogPresence_df)
+    current_df = addToCurrentData(cogPresence_df,dict['name'])  # load in Tvdatabase and add cogPresence column to it.
+    createClusterMap(current_df, dict['name'], dict['html_resource'], dict['pdf'])
 
-def vivax_contigs(args,dict):
-# argdict = {'name': 2, 'pdfexport': 3, 'contigs': 4, 'html_file': 5, 'html_resource': 6}
-
-    #test_cluster(args,dict)
-    #return;
-
-    #subprocess.call('echo $PATH',shell = True)
-    #sys.exit(1)
-
+def vivax_contigs(dict):
     vivaxPath = os.path.dirname(os.path.realpath(__file__))+r"/data/vivax"
-    shutil.copyfile(args[dict['contigs']], args[dict['name']]+".fa")
-    blastResult_df = blastContigs(args[dict['name']], vivaxPath+r"/Database/COGs.fas")
-    orthPresence_df = getCogsPresent(blastResult_df, args[dict['name']], vivaxPath+r"/Database/COGlist.txt")
+    shutil.copyfile(dict['contigs'], dict['name']+".fa")
+    blastResult_df = blastContigs(dict['name'], vivaxPath+r"/Database/COGs.fas")
+    orthPresence_df = getCogsPresent(blastResult_df, dict['name'], vivaxPath+r"/Database/COGlist.txt")
 
-    binBlastResult_df = blastContigs(args[dict['name']], vivaxPath+r"/Database/Bin_2.fas")
-    binPresence_df = getCogsPresent(binBlastResult_df, args[dict['name']], vivaxPath+r"/Database/binlist.txt")
+    binBlastResult_df = blastContigs(dict['name'], vivaxPath+r"/Database/Bin_2.fas")
+    binPresence_df = getCogsPresent(binBlastResult_df, dict['name'], vivaxPath+r"/Database/binlist.txt")
     cogPresence_df = orthPresence_df.append(binPresence_df, ignore_index=True)
 
-    fname = args[dict['html_resource']]+r"/"+ args[dict['name']]+"_cogspresent.csv"
+    fname = dict['html_resource']+r"/"+ dict['name']+"_cogspresent.csv"
     cogPresence_df.to_csv(fname)
-    current_df = addToCurrentData(cogPresence_df,args[dict['name']])  # load in Tvdatabase and add cogPresence column to it.
-    createClusterMap(current_df, args[dict['name']], args[dict['html_resource']], args[dict['pdfexport']])
-    createHTML(args[dict['name']],args[dict['html_file']],args[dict['html_resource']])
+    current_df = addToCurrentData(cogPresence_df,dict['name'])  # load in Tvdatabase and add cogPresence column to it.
+    createClusterMap(current_df, dict['name'], dict['html_resource'], dict['pdf'])
+    createHTML(dict['name'],dict['html_file'],dict['html_resource'])
 
 if __name__ == "__main__":
+    print("ERROR: Tryp_V.py should only be called from within VAp.py")
+    sys.exit()
+    """
+    name = "test"
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    j_fname = dir_path+r"/data/vivax/geoTv.csv"
+    geo_df = pd.read_csv(j_fname)
+    geo_df.loc[len(geo_df)] =[name,name,'k']
+    #print(geo_df)
+    countryList = pd.unique(geo_df['Location'])
+    colourList = pd.unique(geo_df['colour'])
+    #
+    #for c in countryList:
+    #    colourList.append(geo_df[(geo_df['Location'] == c)]['colour'])
+
+    print(countryList)
+    print(colourList)
+    for i in range(0,len(colourList)):
+        print("country = %s, colour = %s" %(countryList[i],colourList[i]))
+        p = Patch(facecolor = str(colourList[i]),label = countryList[i])
+
+    sys.exit()
+
+
     #assembleWithVelvet("V2_Test",'65','400', '5',"data/TviBrRp.1.clean","data/TviBrRp.2.clean")
     #assembleWithVelvet("V2_Test",'65','400', '5',"data/Tv493.1","data/Tv493.2")
     #blastResult_df=blastContigs("V2_Test",r"/Database/COGs.fas")
-    cogPresence_df = pd.read_csv("test_cogspresent.csv")
+    cogPresence_df = pd.read_csv("TestV_cogspresent.csv")
     print(cogPresence_df)
-    current_df = addToCurrentData(cogPresence_df,"vTest")  # load in Tvdatabase and add cogPresence column to it.
-    createClusterMap(current_df, "vTest", "sausages","no")
-    createHTML("vTest","vTest.html","sausages")
+    current_df = addToCurrentData(cogPresence_df,"TestV")  # load in Tvdatabase and add cogPresence column to it.
+    createClusterMap(current_df, "TestV", "results","no")
+    createHTML("TestV","vTest.html","results")
     sys.exit()
 
     blastResult_df=blastContigs("Tv493",r"/Database/COGs.fas")
@@ -286,7 +384,7 @@ if __name__ == "__main__":
     cogPresence_df = orthPresence_df.append(binPresence_df, ignore_index=True)
     #now do the next bit?
     current_df = addToCurrentData(cogPresence_df)  # load in Tvdatabase and add cogPresence column to it.
-    createClusterMap(current_df,'Test',dict['html_resource'] ,dict['pdfexport'])
+    createClusterMap(current_df,'Test',dict['html_resource'] ,dict['pdf'])
 
 
     #print(cogPresence_df)
@@ -301,7 +399,7 @@ if __name__ == "__main__":
     cogPresence_df = pd.read_csv(fname)
 
     current_df = addToCurrentData(cogPresence_df)       #load in Tvdatabase and add cogPresence column to it.
-
+"""
 
 
 

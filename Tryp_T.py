@@ -1,30 +1,35 @@
 """
-From Sara's VAP_TP.sh
-readname=$1 #strain or input file name
-res=$2 #forward transcript reads file file (fastq)
-re=$3 #reverse transcript reads file file (fastq)
+ * Copyright 2018 University of Liverpool
+ * Author John Heap, Computational Biology Facility, UoL
+ * Based on original scripts of Sara Silva Silva Pereira, Institute of Infection and Global Health, UoL
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ """
 
-bowtie2 -x Reference/IL3000 -1 $2 -2 $3  -S $1.sam 2> log.txt
-
-samtools view -bS $1.sam > $1.bam
-samtools sort $1.bam $1.sorted
-samtools index $1.sorted.bam $1.sorted.bai
-
-
-cufflinks -G Reference/IL3000.gtf -o $1.cuff -u -p 8 $1.sorted.bam
-"""
 
 import subprocess
 import pandas as pd
 import re
 import os
 import sys
+import shutil
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 pList = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10', 'P11', 'P12', 'P13', 'P14', 'P15']
-quietString = "" #"">> Vap_log.txt 2>&1"
+
 def transcriptMapping(inputname, strain, forwardFN,reverseFN):
     #where is our Reference data -
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -33,53 +38,43 @@ def transcriptMapping(inputname, strain, forwardFN,reverseFN):
         refName = dir_path+"/data/Reference/Tc148"
     if strain == "IL3000":
         refName = dir_path+"/data/Reference/IL3000"
-    #argString = "bowtie2 -x Refe4rence/IL3000 -1 data/"+forwardFN+" -2 data/"+reverseFN+" -S "+inputname+".sam"    #>log.txt
-    #argString = "bowtie2 -x Reference/Tc148 -1 data/"+forwardFN+" -2 data/"+reverseFN+" -S "+inputname+".sam"    #>log.txt
-    argString = "bowtie2 -x "+refName+" -1 "+forwardFN+" -2 "+reverseFN+" -S "+inputname+".sam"+quietString    #>log.txt
-    #print(argString)
-    returncode = subprocess.call(argString, shell=True)
+    #now have reference file so we can proceed with the transcript mapping via bowtie2
+    argString = "bowtie2 -x "+refName+" -1 "+forwardFN+" -2 "+reverseFN+" -S "+inputname+".sam"
+    print(argString)
+    subprocess.call(argString, shell=True)  #outputs a name.sam file
+    return
 
 def processSamFiles(inputname):
-    #debug use a mapping sam file we have already found
-    #dir_path = os.path.dirname(os.path.realpath(__file__))
-    #bugName = dir_path+"/data/T_Test" #defasult
-
     cur_path = os.getcwd()
     samName = cur_path+"/"+inputname
+    argString = "samtools view -bS "+inputname+".sam > "+samName+".bam"
+    print(argString)
+    subprocess.call(argString, shell=True)
 
-    #argString = "samtools view -bS "+bugName+" > "+inputname+".bam"
-    argString = "samtools view -bS "+inputname+".sam > "+samName+".bam"+quietString
-    #print(argString)
-    returncode = subprocess.call(argString, shell=True)
+    argString = "samtools sort "+samName+".bam -o "+samName+".sorted"
+    print("argstring = "+argString)
+    subprocess.call(argString, shell=True)
 
-
-    #argString = "samtools sort "+bugName+" -o "+inputname+".sorted"
-    argString = "samtools sort "+samName+".bam -o "+samName+".sorted"+quietString
-    #print("argstring = "+argString)
-    returncode = subprocess.call(argString, shell=True)
-
-    #argString = "samtools index "+bugName+".sorted "+inputname+".sorted.bai"
-    argString = "samtools index "+samName+".sorted "+samName+".sorted.bai"+quietString
-    #print("argstring = " + argString)
-    returncode = subprocess.call(argString, shell=True)
-
-
-
+    argString = "samtools index "+samName+".sorted "+samName+".sorted.bai"
+    print("argstring = " + argString)
+    subprocess.call(argString, shell=True)
+    return  #we have saved out the relevent name.bam, name.sorted and name.sorted.bai files
 
 def transcriptAbundance(inputname, strain):
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    refName = dir_path + "/data/Reference/ORFAnnotation.gtf"  # defasult
+    refName = dir_path + "/data/Reference/ORFAnnotation.gtf"  # default
     if strain == "Tc148":
-        refName = dir_path + "/data/Reference/ORFAnnotation.gtf"
+        refName = dir_path + "/data/Reference/ORFAnnotation.gtf"    #still default
     if strain == "IL3000":
         refName = dir_path + "/data/Reference/IL3000.gtf"
-    #argString = "cufflinks -G Reference/IL3000.gtf -o "+inputname+".cuff -u -p 8 "+inputname+".sorted"
-    #argString = "cufflinks -G Reference/ORFAnnotation.gtf -o "+inputname+".cuff -u -p 8 "+inputname+".sorted"
-    argString = "cufflinks -q -G "+refName+" -o "+inputname+".cuff -u -p 8 "+inputname+".sorted"+quietString
-    returncode = subprocess.call(argString, shell = True)
+    argString = "cufflinks -q -G "+refName+" -o "+inputname+".cuff -u -p 8 "+inputname+".sorted"
+    subprocess.call(argString, shell = True)
+    os.remove(inputname+".sorted")  #remove name.sorted
+    os.remove(inputname+".sorted.bai")
+    os.remove(inputname+".bam")
+    return
 
-
-def convertToFasta(inputName, strain):  #equivalent to Sara's awk scripte
+def convertToFasta(inputName, strain):  #equivalent to Sara's awk script
     dir_path = os.path.dirname(os.path.realpath(__file__))
     refName = dir_path + "/data/Reference/ORFAnnotation.gtf"  # default
     if strain == "Tc148":
@@ -92,13 +87,6 @@ def convertToFasta(inputName, strain):  #equivalent to Sara's awk scripte
     cuff_df.to_csv("cuffTest.csv")
     gene_id_List = cuff_df['gene_id'].tolist()
 
-    #print(gene_id_List)
-    #print ("Found from 8880="+str(found))
-
-    # need to load in IL3000_prot.fasta
-    # for each line with >TcIL3000_1_1940
-    # search within cuff_df[gene_id] for match
-    # add it to the outfile. (need to save it as used by hmmer later
     number = 0
     all = 0
     with open(inputName+"_6frame.fas", 'w') as outfile:
@@ -125,7 +113,6 @@ def convertToFasta(inputName, strain):  #equivalent to Sara's awk scripte
             else:
                 line =ref.readline()
     ref.close()
-    print(str(len(gene_id_List))+":"+str(number)+" from "+str(all))
     return cuff_df
 
 def HMMerMotifSearch(name, strain, cuff_df):
@@ -148,9 +135,9 @@ def HMMerMotifSearch(name, strain, cuff_df):
         n = 0
         outList = []
         for line in hmmResult:
-            m = re.search(regex, line)
-            if m:
-                outList.append(""+m.group())
+            ms = re.search(regex, line)
+            if ms:
+                outList.append(""+ms.group())
                 n += 1
             if re.search(r"inclusion", line):
                 print("inclusion threshold reached")
@@ -160,13 +147,9 @@ def HMMerMotifSearch(name, strain, cuff_df):
         hmmResult.close()
         os.remove("Phy" + m + ".out")
 
-    #print(lineCounts)
-
-    #print(cuff_df)
     concatGroups = [1, 2, 1, 3, 1, 1, 1, 2, 3, 2, 2, 1, 4, 1, 3]
     countList = []
     weightList = []
-    countIndex = 0
     totalCount = 0
     totalWeigth = 0
     for c in concatGroups:
@@ -187,12 +170,17 @@ def HMMerMotifSearch(name, strain, cuff_df):
         totalCount += len(t)
     countList.append(totalCount)
     weightList.append(totalWeigth)
-    #print(countList)
-    #print("--------")
-    #print(weightList)
-    #print("--------")
     os.remove(name + "_6frame.fas")
+    shutil.rmtree(name+".cuff")
     return countList,weightList
+
+
+def relativeFrequencyTableNoSave(countList):
+    relFreqList = []
+    c = float(countList[15])
+    for i in range(0, 15):
+        relFreqList.append(countList[i] / c)
+    return relFreqList
 
 def relativeFrequencyTable(countList, name, htmlresource):
     relFreqList = []
@@ -204,8 +192,15 @@ def relativeFrequencyTable(countList, name, htmlresource):
     relFreq_df = pd.DataFrame(data)
     j_fname = htmlresource+ "/" + name + "_t_relative_frequency.csv"
     relFreq_df.to_csv(j_fname)
-    return relFreqList  # 0-14 = p1-p15 counts [15] = total counts
+    return relFreqList
 
+
+def weightedFrequencyTableNoSave(countList):
+    relFreqList = []
+    c = float(countList[15])
+    for i in range(0, 15):
+        relFreqList.append(countList[i] / c)
+    return relFreqList
 
 def weightedFrequencyTable(countList, name, htmlresource):
     relFreqList = []
@@ -217,15 +212,11 @@ def weightedFrequencyTable(countList, name, htmlresource):
     relFreq_df = pd.DataFrame(data)
     j_fname = htmlresource+ "/" + name + "_t_weighted_frequency.csv"
     relFreq_df.to_csv(j_fname)
-    return relFreqList  # 0-14 = p1-p15 counts [15] = total counts
+    return relFreqList
 
 
 
 def createStackedBar(name,freqList,strain,pdf,html_resource):
-    palette = ["#0000ff", "#6495ed", "#00ffff", "#caff70",
-               "#228b22", "#528b8b", "#00ff00", "#a52a2a",
-               "#ff0000", "#ffff00", "#ffa500", "#ff1493",
-               "#9400d3", "#bebebe", "#000000", "#ff00ff"]
 
     VAP_148 = [0.072, 0.032, 0.032, 0.004, 0.007,
                0.005, 0.202, 0.004, 0.006, 0.014,
@@ -260,8 +251,6 @@ def createStackedBar(name,freqList,strain,pdf,html_resource):
     title = "Figure Legend: The transcriptomic Variant Antigen Profile of $\itTrypanosoma$ $\itcongolense$ estimated as phylotype " \
             "proportion adjusted for transcript abundance and the reference genomic Variant Antigen Profile. " \
             "\nData was produced with the 'Variant Antigen Profiler' (Silva Pereira and Jackson, 2018)."
-    #plt.title(title, wrap="True")
-    #plt.text(-0.2, -0.05, title, va="top", transform=ax.transAxes, wrap="True")
     plt.text(-0.3, -0.15, title, va="top", wrap="True")
     plt.tight_layout(pad=1.5)
     plt.subplots_adjust(bottom = 0.3,top=0.99,left=0.125,right=0.9,hspace=0.2,wspace=0.2)
@@ -269,7 +258,7 @@ def createStackedBar(name,freqList,strain,pdf,html_resource):
     plt.savefig(html_resource + "/stackedbar.png")
     if pdf == 'PDF_Yes':
         plt.savefig(html_resource + "/stackedbar.pdf")
-    #plt.show()
+
 
 
 def createHTML(name,htmlfn,htmlresource,freqList,weightList):
@@ -294,49 +283,21 @@ def createHTML(name,htmlfn,htmlresource,freqList,weightList):
     imgString = r"<img src = 'stackedbar.png' alt='Stacked bar chart of phylotype variation' style='max-width:100%'><br><br>"
     htmlString += imgString
 
-#    htmlString += r"<p><h3>The Deviation Heat Map and Dendogram</h3>The phylotype variation expressed as the deviation from your sample mean compared to the model dataset</p>"
-#    imgString = r"<img src = 'dheatmap.png' alt='Deviation Heatmap' style='max-width:100%'><br><br>"
-#    htmlString += imgString
-
-#    htmlString += r"<p><h3>The Variation PCA plot</h3>PCA analysis corresponding to absolute variation. Colour coded according to location</p>"
-#    imgString = r"<img src = 'vapPCA.png' alt='PCA Analysis' style='max-width:100%'><br><br>"
-#    htmlString += imgString + r"</div></body></html>"
-
     with open(htmlfn, "w") as htmlfile:
         htmlfile.write(htmlString)
 
-#argdict = {'name':2, 'pdfexport': 3, 'strain': 4, 'forward': 5, 'reverse': 6, 'html_file': 7, 'html_resource': 8}
-def transcriptomicProcess(args,dict):
-    transcriptMapping(args[dict['name']], args[dict['strain']], args[dict['forward']], args[dict['reverse']])        #uses bowtie
-    processSamFiles(args[dict['name']])                              #uses samtools
-    transcriptAbundance(args[dict['name']],args[dict['strain']])                          #uses cufflinks -> ?.cuff/*.*
-    cuff_df = convertToFasta(args[dict['name']],args[dict['strain']])
-    countList, weightList = HMMerMotifSearch(args[dict['name']],args[dict['strain']], cuff_df)
-    relFreqList = relativeFrequencyTable(countList,args[dict['name']],args[dict['html_resource']])
-    relWeightList = weightedFrequencyTable(weightList,args[dict['name']],args[dict['html_resource']])
-    createStackedBar(args[dict['name']],relWeightList, args[dict['strain']],args[dict['pdfexport']],args[dict['html_resource']])
-    createHTML(args[dict['name']],args[dict['html_file']],args[dict['html_resource']], relFreqList, relWeightList)
+
+def transcriptomicProcess(dict):
+    transcriptMapping(dict['name'], dict['strain'], dict['forward'], dict['reverse'])        #uses bowtie
+    processSamFiles(dict['name'])                              #uses samtools
+    transcriptAbundance(dict['name'],dict['strain'])                          #uses cufflinks -> ?.cuff/*.*
+    cuff_df = convertToFasta(dict['name'],dict['strain'])
+    countList, weightList = HMMerMotifSearch(dict['name'],dict['strain'], cuff_df)
+    relFreqList = relativeFrequencyTable(countList,dict['name'],dict['html_resource'])
+    relWeightList = weightedFrequencyTable(weightList,dict['name'],dict['html_resource'])
+    createStackedBar(dict['name'],relWeightList, dict['strain'],dict['pdf'],dict['html_resource'])
+    createHTML(dict['name'],dict['html_file'],dict['html_resource'], relFreqList, relWeightList)
 
 if __name__ == "__main__":
-    #print("Commencing Transcript Mapping")
-    #transcriptMapping("T_Test", "Transcripts.1","Transcripts.2")
-    #print("Processimg Sam Files")
-    #processSamFiles("T_Test")
-    #print("Assessing Transcript Abundance")
-    #transcriptAbundance("T_Test")
-    #print ("Converting to Fasta Subset")
-    #cuff_df = convertToFasta("T_Test")
-    #print("Commencing HMMer search")
-    #countList, weightList = HMMerMotifSearch("T_Test",cuff_df)
-    #relativeFrequencyTable(countList,'T_Test')
-    #weightedFrequencyTable(weightList,'T_Test')
-    relFreqList = [0.111842105,0.059210526,0.026315789,0.013157895,
-                   0.006578947,0.013157895,0.032894737,0.019736842,
-                   0.039473684,0.046052632,0.217105263,0.065789474,
-                   0.151315789,0.059210526,0.138157895]
+    sys.exit()
 
-    relWeightList = [0.07532571,0.05900545,0.009601452,0.042357532,0.01236219,0.001675663,0.04109726,
-                     0.097464248,0.057491666,0.05826875,0.279457473,0.070004772,0.065329007,0.085361298,0.045197529]
-
-    createStackedBar('T_Test',relWeightList, 'Tc148','PDF_Yes','results')
-    createHTML("t_test","results/t_test.html","results",relFreqList,relWeightList)

@@ -2,6 +2,7 @@
 Variant Antigen Profiling for Trypanosoma congolense and Trypanosoma vivax
 
 Introduction:
+-------------
 Trypanosomes are important human and veterinary parasites that cause potentially lethal blood 
 infections and a chronic wasting disease (African trypanosomiasis). These organisms use antigenic 
 variation to evade the host immune response, for which their genomes contain many hundreds of 
@@ -55,40 +56,116 @@ The results compare this matrix with a database of 20 isolates and a heatmap and
 provided for comparison.
 
 
-System requirements
+Instructions:
+-------------
 
-The python script require the following tools. 
-Velvet for assembly		https://www.ebi.ac.uk/~zerbino/velvet/
-EMBOSS transeq			http://emboss.open-bio.org/
-HMMER for HMM search    http://hmmer.org/
-bowtie2           		http://bowtie-bio.sourceforge.net/bowtie2/index.shtml
-samtools          		http://www.htslib.org/
-cufflinks           	http://cole-trapnell-lab.github.io/cufflinks/
-Blast     				https://blast.ncbi.nlm.nih.gov/Blast.cgi
-
-Usage:
-
-usage: Vap.py name [-h] [-s S] [-con CON] [-t] [-p] [-strain STRAIN] [-f F] [-r R]
-              [-k K] [-i I] [-cov COV]
+Vap.py 	- parses command line parameters and selects pathways accordingly 
+	imports files 
+		Tryp_G.py	- the T.congolense genomic pathway   	 
+		Tryp_T.py	- the T.congolense transcriptomic pathway
+		Tryp_V.py	- the T.vivax analysis via COG assessment
+		Tryp_Multi.py	- manages multiple samples of the above three parthways
+        
+	Requires the Data directory for strain comparisons and geographical origins
+		data/Motifs	- the hmm files for the 15 phylotypes searched for by hmmer
+		data/Reference - fasta files for different strains used by T.congolense transcriptomic pathway
+		data/vivax - Database and geo tags for T.vivax strains
+		data/congodata.csv - the relative frequency of phylotypes appearing in T.congolense strains so far 
+		data/congodata_deviationfromthemean.csv - as above but holding the deviation from the mean frequency 
+		
+	The python program Vap.py uses the following packages to analyze the isolates.
+	Please ensure that these are installed and available to the python environment
+	
+	package				version used		website
+	velvet				1.2.10				https://www.ebi.ac.uk/~zerbino/velvet/
+	EMBOSS transeq		6.6.0.0         	http://emboss.open-bio.org/
+	HMMER				3.1b2       		http://hmmer.org/
+	bowtie2				2.2.6				http://bowtie-bio.sourceforge.net/bowtie2/index.shtml
+	samtools			1.6					http://www.htslib.org/
+	cufflinks           2.2.1				http://cole-trapnell-lab.github.io/cufflinks/
+	blast				2.7.1               https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download
+	
+	As well as the usual python libraries Vap.py requires seaborn version 0.8.0 for clustermaps
+	
+	USAGE
+	
+	python Vap.py --help		lists the command line arguments accepted as below
+	
+	usage: Vap.py [-h] [-s S] [-con CON] [-t] [-p] [-strain STRAIN] [-dir DIR]
+              [-cdir CDIR] [-f F] [-r R] [-k K] [-i I] [-cov COV]
               name
 
-Variant Antigen Profiler - the VAP.
+	Variant Antigen Profiler - the VAPPER.
 
-positional arguments:
-  name            Prefix for results directory/files
+	positional arguments:
+	  name            Prefix for results directory and files therein
 
-optional arguments:
-  -h, --help      show this help message and exit
-  -s S            Species: T.congolense (default) or T.vivax
-  -con CON        Contigs File
-  -t, -T          Transciptomic Pathway
-  -p, -P          Export PDFs to results directory
-  -strain STRAIN  strain required for Transcriptomic pathway
-  -f F            Forward NGS read file
-  -r R            Reverse NGS Read File
-  -k K            kmers (default = 65)
-  -i I            Insert Length (default = 400)
-  -cov COV        Coverage cut off default = 5
+	optional arguments:
+	  -h, --help      show this help message and exit
+	  -s S            Species: T.congolense (default) or T.vivax
+	  -con CON        Contigs File (fasta)
+	  -t, -T          Transcriptomic Pathway
+	  -p, -P          Export PDFs of images to results directory as well as .pngs 
+	  -strain STRAIN  Strain for Transcriptomic pathway (defaults to Tc148)
+	  -dir DIR        Directory that holds multiple paired NGS readfiles for analysis
+	  -cdir CDIR      Directory that holds multiple pre-assembled contigs (fasta)files for analysis
+	  -f F            Forward NGS read file
+	  -r R            Reverse NGS Read File
+	  -k K            kmers (default = 65) as used in velvet
+	  -i I            Insert Length (default = 400) as used in velvet
+	  -cov COV        Coverage cut off (default = 5) as used in velvet
 
-  
+	
+	
+	Example of use.
+	
+	T.congolense Genomic pathway:
+	Single sample of T.congolense from paired NGS read files. 
+	python Vap.py sgtest -f Test1.fastq -r Test2.fastq  
+	Result images, csv files  and html file will be found in directory results/sgtest/
+	
+	Multiple sample of T.congolense from several sets of paired NGS read files place in directory /mydata/
+	Each set of paired files should have the same name except for trailing 1 or 2 (eg Test1.fastq, Test2.fastq) 
+	python Vap.py mgtest -dir mydata
+	Result images, csv files  and html file will be found in directory results/mgtest/
+	
+	Single sample of T.congolense from a contigs file 
+	python Vap.py sctest -con Test.fa 
+	Result images, csv files  and html file will be found in directory results/sctest/
+	
+	Multiple sample of T.congolense from several contigs file (*.fa) placed in directory mycdata 
+	python Vap.py mctest -cdir mycdata 
+	Result images, csv files  and html file will be found in directory results/mctest/
+
+	T.congolense Transcriptomic pathway
+	
+	Single sample of T.congolense, transcriptomic pathway from paired Transcript read files 
+	python Vap.py sttest -t -f Transcripts.1 -r Transcripts.2 
+	Result images, csv files  and html file will be found in directory results/sttest/
+	
+	Multiple sample of T.congolense from several sets of paired transcript read files place in directory /mytdata/
+	Each set of paired files should have the same name except for trailing 1 or 2 (eg Transcripts.1, Transcripts.2) 
+	python Vap.py mttest -t -dir mytdata
+	Result images, csv files  and html file will be found in directory results/mttest/
+
+	T.vivax: 
+	Single sample of T.vivax from paired NGS read files. 
+	python Vap.py svtest -s T.vivax -f Test1.fastq -r Test2.fastq  
+	Result images, csv files  and html file will be found in directory results/svtest/
+	
+	Multiple sample of T.vivax from several sets of paired NGS read files place in directory /myvdata/
+	Each set of paired files should have the same name except for trailing 1 or 2 (eg Test1.fastq, Test2.fastq) 
+	python Vap.py mvtest -s T.vivax -dir myvdata
+	Result images, csv files  and html file will be found in directory results/mvtest/
+	
+	Single sample of T.vivax from a contigs file 
+	python Vap.py scvtest -s T.vivax -con Test.fa 
+	Result images, csv files  and html file will be found in directory results/scvtest/
+	
+	Multiple sample of T.vivax from several contigs file (*.fa) placed in directory mycdata 
+	python Vap.py mcvtest -s T.vivax -cdir mycdata 
+	Result images, csv files  and html file will be found in directory results/mcvtest/
+	
+	
+
   

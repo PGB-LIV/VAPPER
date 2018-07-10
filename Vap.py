@@ -1,5 +1,21 @@
-#import subprocess
-#import re
+"""
+ * Copyright 2018 University of Liverpool
+ * Author John Heap, Computational Biology Facility, UoL
+ * Based on original scripts of Sara Silva Silva Pereira, Institute of Infection and Global Health, UoL
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ """
 import os
 import sys
 #import pandas as pd
@@ -10,136 +26,173 @@ import sys
 import Tryp_G
 import Tryp_T
 import Tryp_V
+import Tryp_Multi
+
 import argparse
 #Entry .sort out the arguments
 errorString = "**** ERROR ********\n"
-pdfExport = False
-parser = argparse.ArgumentParser(description='Variant Antigen Profiler - the VAP.')
+pdf = False
 
-parser.add_argument('name', help = "Prefix for results directory/files")
+# this dictionary is filled out by initialiseParameters() and passed to individual processes and methods
+vapperDict = {
+    'name':"",
+    'species':"",
+    'strain':"",
+    'directory':"",
+    'pdf': "",
+    'pathway':"",
+    'kmers': "",
+    'inslen':"",
+    'covcut':"",
+    'forward': "",
+    'reverse': "",
+    'contigs':"",
+    'html_file': "",
+    'html_resource':"",
+}
+
+
+
+"""
+Function: initialiseParamters(cargs):
+Flushes out the global vapperDict with the provided command line parameters
+"""
+def initialiseParameters(cargs):
+    global vapperDict
+    vapperDict['name']=cargs['name']      #Prefix for results directory and files therein. Only positional argument
+    vapperDict['species'] = 'T.congolense'  #default
+    if cargs['s'] != 'T.congolense':
+        vapperDict['species']='T.vivax'     #if not T.congolense then T.vivax
+
+    vapperDict['strain'] = cargs['strain']  #defaults to Tc148
+    if cargs['cdir']:
+        vapperDict['directory']= cargs['cdir']
+        vapperDict['contigs']="multiCon"    #just a token to ensure we go down the contigs pathway
+    if cargs['dir']:                  #is there a directory? If so here we hold multipe samples
+        vapperDict['directory']=cargs['dir']
+
+    if cargs['p']:
+        vapperDict['pdf'] = "PDF_Yes"
+    else:
+        vapperDict['pdf'] = "PDF_No"
+
+    #set up pathway
+    vapperDict['pathway']="Genomic" #default
+    if cargs['t']:
+        vapperDict['pathway'] = 'Transcriptomic'
+
+    #assembly directives
+    vapperDict['kmers']=str(cargs['k'])
+    vapperDict['inslen']=str(cargs['i'])
+    vapperDict['covcut']=str(cargs['cov'])
+
+    #forward, reverse, or contig file
+    if cargs['f']:
+        vapperDict['forward']= cargs['f']
+    if cargs['r']:
+        vapperDict['reverse']= cargs['r']
+    if cargs['con']:
+        vapperDict['contigs']=cargs['con']
+
+    #output directory and html file naem
+    htmlfile = r"./results/" + cargs['name'] + "/" + cargs['name'] + ".html"
+    htmldir = r"./results/" + cargs['name'] + "/"
+    if not os.path.exists(htmldir):
+        os.makedirs(htmldir)
+    vapperDict['html_file']=htmlfile
+    vapperDict['html_resource']=htmldir
+
+
+"""
+Entry point to Vap.py
+"""
+#set up command line argument parser
+parser = argparse.ArgumentParser(description='Variant Antigen Profiler - the VAPPER.')
+parser.add_argument('name', help = "Prefix for results directory and files therein")
 parser.add_argument('-s', default= "T.congolense", help = "Species: T.congolense (default) or T.vivax")
-parser.add_argument('-con', help = "Contigs File")
-parser.add_argument('-t','-T', action = 'store_true', default = False, help = "Transciptomic Pathway")
-parser.add_argument('-p','-P', action = 'store_true', default = False, help = "Export PDFs to results directory")
-parser.add_argument('-strain',default = "Tc148", help = "strain required for Transcriptomic pathway")
+parser.add_argument('-con', help = "Contigs File (fasta)")
+parser.add_argument('-t','-T', action = 'store_true', default = False, help = "Transcriptomic Pathway")
+parser.add_argument('-p','-P', action = 'store_true', default = False, help = "Export PDFs to results directory, as well as .png")
+parser.add_argument('-strain',default = "Tc148", help = "strain for Transcriptomic pathway. (defaults to Tc148)")
+parser.add_argument('-dir', help = "Directory that holds multiple paired NGS readfiles for analysis")
+parser.add_argument('-cdir', help = "Directory that holds multiple pre-assembled contigs (fasta) files for analysis")
 parser.add_argument('-f', help = "Forward NGS read file")
 parser.add_argument('-r', help = "Reverse NGS Read File")
-parser.add_argument('-k', type = int, default = 65, help = 'kmers (default = 65)')
-parser.add_argument('-i',type = int, default = 400, help = 'Insert Length (default = 400)' )
-parser.add_argument('-cov', type = int, default = 5, help = 'Coverage cut off default = 5')
+parser.add_argument('-k', type = int, default = 65, help = 'kmers (default = 65) as used in velvet')
+parser.add_argument('-i',type = int, default = 400, help = 'Insert Length (default = 400) as used in velvet' )
+parser.add_argument('-cov', type = int, default = 5, help = 'Coverage cut off (default = 5) as used in velvet ')
+cargs = vars(parser.parse_args())   #cargs = list of commnand line arguments
+initialiseParameters(cargs)         #flushes out vapperDict with command line arguments
+#print (vapperDict)
 
-cargs = vars(parser.parse_args())        #cargs = list of commnand line arguments
-print (cargs)
-
-#we need to do some sanity checking.
-htmlfile = r"./results/"+cargs['name']+"/"+cargs['name']+".html"
-htmldir = r"./results/"+cargs['name']+"/"
-if not os.path.exists(htmldir):
-    os.makedirs(htmldir)
-
-
-
-#then wrangle the command line arguments to be the same arrangement as the Galaxy server ones.
-if cargs['p']:
-    cargs['p']= "PDF_Yes"
-else:
-    cargs['p']="PDF_No"
-
-if cargs['s'] != "T.congolense":
-    print("Assuming Vivax")
-    if cargs['con']!=None:
-        print("Assuming Contig file available")
-        arguments = [cargs['name'],(cargs['con']), htmlfile, htmldir,cargs['p']]
-        argdict = {'name': 0, 'pdfexport':4 , 'contigs': 1, 'html_file': 2, 'html_resource': 3}
-        Tryp_V.vivax_contigs(arguments, argdict)
-    else:
-        print("Assuming full T.Vivax assembly")
-        if cargs['f'] == None or cargs['r'] == None:
-            print(
-                errorString + "For full assembly we require both forward and reverse NGS readfiles to be sepecified\n" + errorString)
-            parser.print_help()
-            sys.exit()
-
-        argdict = {'name': 0, 'pdfexport': 8, 'kmers': 3, 'inslen': 4, 'covcut': 5, 'forward': 1, 'reverse': 2,
-                   'html_file': 6, 'html_resource':7}
-        arguments = [cargs['name'],cargs['f'],cargs['r'],str(cargs['k']),str(cargs['i']),str(cargs['cov']), htmlfile, htmldir,cargs['p']]
-        Tryp_V.vivax_assemble(arguments, argdict)
-else:
-    print("Assuming T.congolense")
-    if cargs['t']:
-        print('T.congolense Transcriptomic Pathway')
-        argdict = {'name': 0, 'pdfexport': 1, 'strain': 2, 'forward': 3, 'reverse': 4, 'html_file': 5,
-                   'html_resource': 6}
-        arguments = [cargs['name'],cargs['p'],cargs['strain'],cargs['f'],cargs['r'],htmlfile,htmldir]
-        Tryp_T.transcriptomicProcess(arguments, argdict)
-    else:
-        print('T.congolense Genomic Pathway')
-        if cargs['con'] != None:
-            print("Assuming Contig file available")
-            arguments = [cargs['name'], cargs['con'], htmlfile, htmldir, cargs['p']]
-            argdict = {'name': 0, 'pdfexport': 4, 'contigs': 1, 'html_file': 2, 'html_resource': 3}
-            Tryp_G.contigs(arguments, argdict)
+#
+if vapperDict['directory'] !="":
+    print("Multiple samples indicated in directory: %s" % vapperDict['directory'])
+    if vapperDict['species'] != "T.congolense":
+        print("Assuming species = T.Vivax")
+        if vapperDict['contigs'] != "":
+            print("Looking for Contig files in %s" % vapperDict['directory'])
+            Tryp_Multi.multi_V_Contigs(vapperDict)
         else:
-            print("Assuming full T.congolense assembly")
-            #need forwards and reverse file names
-            if cargs['f']==None or cargs['r']==None:
-                print (errorString+ "For full assembly we require both forward and reverse NGS readfiles to be sepecified\n"+errorString)
+            print("Looking for paired NFS readfiles in %s" % vapperDict['directory'])
+            Tryp_Multi.multi_V_Assembly(vapperDict)
+    else:
+        print("Assuming species = T.congolense")
+        if vapperDict['pathway'] == 'Transcriptomic':
+            print('Transcriptomic Pathway: searching for paired transcripts in %s' %vapperDict['directory'])
+            Tryp_Multi.multi_T_process(vapperDict)
+        else:
+            print('T.congolense Genomic Pathway:')
+            if vapperDict['contigs'] != "":
+                print("Looking for Contig files in %s" % vapperDict['directory'])
+                Tryp_Multi.multi_G_contigs(vapperDict)
+            else:
+                print("Looking for paired NFS readfiles in %s" % vapperDict['directory'])
+                Tryp_Multi.multi_G_Assembly(vapperDict)
+else:
+    #single sample version of the above
+    if vapperDict['species'] != "T.congolense":
+        print("Assuming species = T.Vivax")
+        if vapperDict['contigs']!="":
+            print("Looking for Contig file: %s" % vapperDict['contigs'])
+            Tryp_V.vivax_contigs(vapperDict)
+        else:
+            print("Assuming full T.Vivax assembly")
+            if vapperDict['forward'] == "" or vapperDict['reverse'] == "":
+                print(
+                    errorString + "For full assembly we require both forward and reverse NGS readfiles to be sepecified\n" + errorString)
                 parser.print_help()
                 sys.exit()
-
-            argdict = {'name': 0, 'pdfexport': 8, 'kmers': 3, 'inslen': 4, 'covcut': 5, 'forward': 1, 'reverse': 2,
-                       'html_file': 6, 'html_resource': 7}
-            arguments = [cargs['name'], cargs['f'], cargs['r'], str(cargs['k']), str(cargs['i']), str(cargs['cov']),
-                         htmlfile, htmldir, cargs['p']]
-
-
-            print(arguments)
-            Tryp_G.assemble(arguments, argdict)
-
-sys.exit()
-
-
-
-
-
-
-
-#parser.add_argument('heatmapFile')
-#parser.add_argument('PCAFile')
-#parser.add_argument('devheatmapFile')
-#args = parser.parse_args()
-
-#we have numerous parameters....
-#hard code it for differnt types?
-
-
-#For congolense - we have..
-"""
-arguments = sys.argv
-htmldir = arguments[len(arguments)-1]   #last argument is always html_resource
-if not os.path.exists(htmldir):
-    os.mkdir(htmldir)
-
-if arguments[1] == 'g_assemble':
-    argdict = {'name':2, 'pdfexport':3, 'kmers':4,'inslen':5, 'covcut':6, 'forward':7, 'reverse':8, 'html_file':9, 'html_resource':10}
-    Tryp_G.assemble(arguments,argdict)
-if arguments[1] == 'g_contigs':
-    argdict = {'name':2, 'pdfexport':3, 'contigs':4, 'html_file':5, 'html_resource':6}
-    Tryp_G.contigs(arguments,argdict)
-if arguments[1] == 'transcipt':
-    argdict = {'name':2, 'pdfexport': 3, 'strain': 4, 'forward': 5, 'reverse': 6, 'html_file': 7, 'html_resource': 8}
-    Tryp_T.transcriptomicProcess(arguments,argdict)
-if arguments[1] == 'v_assemble':
-    argdict = {'name':2, 'pdfexport':3, 'kmers':4,'inslen':5, 'covcut':6, 'forward':7, 'reverse':8, 'html_file':9, 'html_resource':10}
-    Tryp_V.vivax_assemble(arguments,argdict)
-if arguments[1] == 'v_contigs':
-    argdict = {'name':2, 'pdfexport':3, 'contigs':4, 'html_file':5, 'html_resource':6}
-    Tryp_V.vivax_contigs(arguments,argdict)
-
+            print("Assembling paired NGS readfiles %s and %s" %(vapperDict['forward'],vapperDict['reverse']))
+            Tryp_V.vivax_assemble(vapperDict)
+    else:
+        print("Assuming species = T.congolense")
+        if vapperDict['pathway'] =='Transcriptomic':
+            print('T.congolense Transcriptomic Pathway:')
+            print("Using paired NGS readfiles %s and %s" %(vapperDict['forward'],vapperDict['reverse']))
+            Tryp_T.transcriptomicProcess(vapperDict)
+        else:
+            print('T.congolense Genomic Pathway:')
+            if vapperDict['contigs'] != "":
+                print("Looking for Contig file: %s" % vapperDict['contigs'])
+                Tryp_G.contigs(vapperDict)
+            else:
+                print("Assuming full T.congolense assembly")
+                #need forwards and reverse file names
+                if vapperDict['forward'] == "" or vapperDict['reverse'] == "":
+                    print(
+                            errorString + "For full assembly we require both forward and reverse NGS readfiles to be sepecified\n" + errorString)
+                    parser.print_help()
+                    sys.exit()
+                print("Assembling paired NGS readfiles %s and %s" % (vapperDict['forward'], vapperDict['reverse']))
+                Tryp_G.assemble(vapperDict)
 
 sys.exit()
 
-"""
+
+
+
+
 
 
 
