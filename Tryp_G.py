@@ -167,9 +167,10 @@ def relativeFrequencyHeatMap(name, freqList, pdf, htmlresource):
     congo_df = pd.read_csv(j_fname)
     congo_df.drop('Colour', axis=1, inplace=True)
     congo_df.loc[congo_df.index.max() + 1] = localFreqList
+    ysize = len(congo_df) * 20 / 97.0  # make vertical size equivlanet 20' is ok for 97.
     congo_df.set_index('Strain', inplace=True)
 
-    cg = sns.clustermap(congo_df, method='ward', cmap = "RdBu_r", col_cluster=False, yticklabels = congo_df.index.values)
+    cg = sns.clustermap(congo_df, method='ward', cmap = "RdBu_r", col_cluster=False, yticklabels = congo_df.index.values, figsize = (10,ysize))
     plt.setp(cg.ax_heatmap.yaxis.get_ticklabels(), rotation=0, fontsize=8)  # get y labels printed horizontally
     ax=cg.ax_heatmap
     title = "Variant Antigen Profiles of $\itTrypanosoma$ $\itcongolense$ estimated as the phylotype proportion across the\nsample cohort. "
@@ -191,8 +192,10 @@ def deviationFromMeanHeatMap(name,devList, pdf, htmlresource):
     congo_df = pd.read_csv(j_fname)
     congo_df.drop('Colour', axis=1, inplace=True)
     congo_df.loc[congo_df.index.max() + 1] = localDevList
+    ysize = len(congo_df)*20/97.0       #make vertical size equivlanet 20' is ok for 97.
     congo_df.set_index('Strain', inplace=True)
-    cg = sns.clustermap(congo_df, method='ward',cmap = "RdBu_r", col_cluster=False, yticklabels = congo_df.index.values)
+
+    cg = sns.clustermap(congo_df, method='ward',cmap = "RdBu_r", col_cluster=False, yticklabels = congo_df.index.values, figsize = (10,ysize))
     plt.setp(cg.ax_heatmap.yaxis.get_majorticklabels(), rotation=0, fontsize=8)  # get y labels printed horizontally
     ax = cg.ax_heatmap
     title = "Variant Antigen Profiles of $\itTrypanosoma$ $\itcongolense$ expressed as the deviation from the mean phylotypes "
