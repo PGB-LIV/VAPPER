@@ -166,10 +166,13 @@ Vap.py 	- parses command line parameters and selects pathways accordingly
 	python Vap.py mcvtest -s T.vivax -cdir mycdata 
 	Result images, csv files  and html file will be found in directory results/mcvtest/
 	
+Examples:
+-------------
+	The directory "Example_data" contain examples of the outputs that should be expected. For  T. congolense, this includes two PDF and PNG heatmaps/dendrograms; a PCA plot; and two CSV files containing the VAP of a test sample, expressed as the phylotype relative frequncy and variation (the deviation from the mean). For T. vivax, this includes a cluster map in the form of heatmap/dendrogram, and a CSV file with a binary matrix representing a VAP of a test sample.
 	
-
   
 References:
+-------------
 
 Silva Pereira, S. et al. (2018) Variant antigen repertoires in Trypanosoma congolense populations and experimental infections can be profiled from deep sequence data with a set of universal protein motifs. 
 
