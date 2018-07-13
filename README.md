@@ -168,7 +168,10 @@ Vap.py 	- parses command line parameters and selects pathways accordingly
 	
 Examples:
 -------------
-	The directory "Example_data" contain examples of the outputs that should be expected. For  T. congolense, this includes two PDF and PNG heatmaps/dendrograms; a PCA plot; and two CSV files containing the VAP of a test sample, expressed as the phylotype relative frequncy and variation (the deviation from the mean). For T. vivax, this includes a cluster map in the form of heatmap/dendrogram, and a CSV file with a binary matrix representing a VAP of a test sample.
+	The directory "Example_data" contain examples of the outputs that should be expected. For  T. congolense, this includes 
+	two PDF and PNG heatmaps/dendrograms; a PCA plot; and two CSV files containing the VAP of a test sample, expressed as the
+	phylotype relative frequncy and variation (the deviation from the mean). For T. vivax, this includes a cluster map in the 
+	form of heatmap/dendrogram, and a CSV file with a binary matrix representing a VAP of a test sample.
 	
   
 References:
