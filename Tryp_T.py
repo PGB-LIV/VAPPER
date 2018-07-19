@@ -41,7 +41,7 @@ def transcriptMapping(inputname, strain, forwardFN,reverseFN):
     #now have reference file so we can proceed with the transcript mapping via bowtie2
     argString = "bowtie2 -x "+refName+" -1 "+forwardFN+" -2 "+reverseFN+" -S "+inputname+".sam"
     print(argString)
-    subprocess.call(argString, shell=True)  #outputs a name.sam file
+   subprocess.call(argString, shell=True)  #outputs a name.sam file
     return
 
 def processSamFiles(inputname):
@@ -80,7 +80,7 @@ def convertToFasta(inputName, strain):  #equivalent to Sara's awk script
     if strain == "Tc148":
         refName = dir_path + "/data/Reference/148_prot.fasta"
     if strain == "IL3000":
-        refName = dir_path + "data/Reference/IL3000_prot.fasta"
+        refName = dir_path + "/data/Reference/IL3000_prot.fasta"
 
     cuff_df = pd.read_csv(inputName+".cuff/genes.fpkm_tracking", sep='\t')
     cuff_df = cuff_df[(cuff_df['FPKM'] > 0)]
@@ -108,6 +108,8 @@ def convertToFasta(inputName, strain):  #equivalent to Sara's awk script
                         while line[0] != '>':
                             outfile.write(line)
                             line=ref.readline()
+                            if not line:
+                                break;
                 else:
                     line = ref.readline()
             else:
