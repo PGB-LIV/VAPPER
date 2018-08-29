@@ -1,4 +1,4 @@
-#VAPPER
+# VAPPER
 Variant Antigen Profiling for Trypanosoma congolense and Trypanosoma vivax
 
 Introduction:
