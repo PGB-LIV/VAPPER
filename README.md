@@ -177,6 +177,6 @@ Examples:
 References:
 -------------
 
-Silva Pereira, S. et al. (2018) Variant antigen repertoires in Trypanosoma congolense populations and experimental infections can be profiled from deep sequence data with a set of universal protein motifs. 
+Silva Pereira, S. et al. (2018) Variant antigen repertoires in Trypanosoma congolense populations and experimental infections can be profiled from deep sequence data with a set of universal protein motifs. Genome Research ePub ahead.
 
 Tihon, E. et al. (2017) Discovery and genomic analyses of hybridization between divergent lineages of Trypanosoma congolense, causative agent of Animal African Trypanosomiasis. Mol Ecol. 26(23):6524-6538. doi: 10.1111/mec.14271. Epub 2017 Aug 24.
