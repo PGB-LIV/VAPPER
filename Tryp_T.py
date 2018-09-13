@@ -41,7 +41,7 @@ def transcriptMapping(inputname, strain, forwardFN,reverseFN):
     #now have reference file so we can proceed with the transcript mapping via bowtie2
     argString = "bowtie2 -x "+refName+" -1 "+forwardFN+" -2 "+reverseFN+" -S "+inputname+".sam"
     print(argString)
-   subprocess.call(argString, shell=True)  #outputs a name.sam file
+    subprocess.call(argString, shell=True)  #outputs a name.sam file
     return
 
 def processSamFiles(inputname):
