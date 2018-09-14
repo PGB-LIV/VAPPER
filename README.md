@@ -118,8 +118,7 @@ Usage:
 
 	
 	
-	Example of use:
-	
+	***** Example of use ***** 
 	
 	
 	T.congolense Genomic pathway:
