@@ -28,7 +28,7 @@ These phylotypes are present in any T. congolense isolate, but their relative ab
 between strains. The purpose of the VAP is to accurately quantify antigen diversity in any T. 
 congolense isolate by calculating the relative frequency of each phylotype. 
 
-T.congolense can be examined at the Genomic or Transcriptomic level. (optional [-t] parameter to 
+T. congolense can be examined at the Genomic or Transcriptomic level. (optional [-t] parameter to 
 flag the transcriptomic pathway.) 
 
 Genomic VAP 
@@ -117,66 +117,89 @@ Vap.py 	- parses command line parameters and selects pathways accordingly
 
 	
 	
-	Example of use.
+	Example of use
 	
 	T.congolense Genomic pathway:
 	Single sample of T.congolense from paired NGS read files. 
-	python Vap.py sgtest -f Test1.fastq -r Test2.fastq  
+	$ python Vap.py sgtest -f Test1.fastq -r Test2.fastq  
 	Result images, csv files  and html file will be found in directory results/sgtest/
 	
 	Multiple sample of T.congolense from several sets of paired NGS read files place in directory /mydata/
 	Each set of paired files should have the same name except for trailing 1 or 2 (eg Test1.fastq, Test2.fastq) 
-	python Vap.py mgtest -dir mydata
+	$ python Vap.py mgtest -dir mydata
 	Result images, csv files  and html file will be found in directory results/mgtest/
 	
 	Single sample of T.congolense from a contigs file 
-	python Vap.py sctest -con Test.fa 
+	$ python Vap.py sctest -con Test.fa 
 	Result images, csv files  and html file will be found in directory results/sctest/
 	
 	Multiple sample of T.congolense from several contigs file (*.fa) placed in directory mycdata 
-	python Vap.py mctest -cdir mycdata 
+	$ python Vap.py mctest -cdir mycdata 
 	Result images, csv files  and html file will be found in directory results/mctest/
 
 	T.congolense Transcriptomic pathway
 	
 	Single sample of T.congolense, transcriptomic pathway from paired Transcript read files 
-	python Vap.py sttest -t -f Transcripts.1 -r Transcripts.2 
+	$ python Vap.py sttest -t -f Transcripts.1 -r Transcripts.2 
 	Result images, csv files  and html file will be found in directory results/sttest/
 	
 	Multiple sample of T.congolense from several sets of paired transcript read files place in directory /mytdata/
 	Each set of paired files should have the same name except for trailing 1 or 2 (eg Transcripts.1, Transcripts.2) 
-	python Vap.py mttest -t -dir mytdata
+	$ python Vap.py mttest -t -dir mytdata
 	Result images, csv files  and html file will be found in directory results/mttest/
 
 	T.vivax: 
 	Single sample of T.vivax from paired NGS read files. 
-	python Vap.py svtest -s T.vivax -f Test1.fastq -r Test2.fastq  
+	$ python Vap.py svtest -s T.vivax -f Test1.fastq -r Test2.fastq  
 	Result images, csv files  and html file will be found in directory results/svtest/
 	
 	Multiple sample of T.vivax from several sets of paired NGS read files place in directory /myvdata/
 	Each set of paired files should have the same name except for trailing 1 or 2 (eg Test1.fastq, Test2.fastq) 
-	python Vap.py mvtest -s T.vivax -dir myvdata
+	$ python Vap.py mvtest -s T.vivax -dir myvdata
 	Result images, csv files  and html file will be found in directory results/mvtest/
 	
 	Single sample of T.vivax from a contigs file 
-	python Vap.py scvtest -s T.vivax -con Test.fa 
+	$ python Vap.py scvtest -s T.vivax -con Test.fa 
 	Result images, csv files  and html file will be found in directory results/scvtest/
 	
 	Multiple sample of T.vivax from several contigs file (*.fa) placed in directory mycdata 
-	python Vap.py mcvtest -s T.vivax -cdir mycdata 
+	$ python Vap.py mcvtest -s T.vivax -cdir mycdata 
 	Result images, csv files  and html file will be found in directory results/mcvtest/
+
+Installation:
+-------------
+
+	To ensure your system has all the required dependencies and before running the VAPPER code for the first time, please type: 
+	source install.sh 
+	(You will need sudo priveleges only if the python libraries are missing) 
+	install.sh will: 
+		1. Temporarily add a path to your system PATH variable 
+		2. Check for the installation of required pyhton libraries
+		3. If the libraries are absent, it will attempt to install virtualenv, a python virtual environment. 
+		4. Then, in the virtual environment, VAPENV, it will install the required python packages.
 	
+	This only needs to be done once per installation. However, after this, and everytime the VAPPER is called, it is necessary to set
+	$PATH and the virtual environment again by typing: 
+	
+	$ source setup.sh
+	
+
 Examples:
 -------------
-	The directory "Example_data" contain examples of the outputs that should be expected. For  T. congolense, this includes 
-	two PDF and PNG heatmaps/dendrograms; a PCA plot; and two CSV files containing the VAP of a test sample, expressed as the
-	phylotype relative frequncy and variation (the deviation from the mean). For T. vivax, this includes a cluster map in the 
-	form of heatmap/dendrogram, and a CSV file with a binary matrix representing a VAP of a test sample.
+The directory "Example_data" contain examples of the outputs that should be expected. For  T. congolense, this includes 
+two PDF and PNG heatmaps/dendrograms; a PCA plot; and two CSV files containing the VAP of a test sample, expressed as the
+phylotype relative frequncy and variation (the deviation from the mean). For T. vivax, this includes a cluster map in the 
+form of heatmap/dendrogram, and a CSV file with a binary matrix representing a VAP of a test sample. 
+
+Additionally, we have provided a small test contig file (to keep file size manageable). Type:
+	$ python Vap.py tc_test -con test_data/Tc_contigs.fa
+The results will be found in results/tc_test.
+
 	
   
 References:
 -------------
 
-Silva Pereira, S. et al. (2018) Variant antigen repertoires in Trypanosoma congolense populations and experimental infections can be profiled from deep sequence data with a set of universal protein motifs. Genome Research ePub ahead.
+Silva Pereira, S. et al. (2018) Variant antigen repertoires in Trypanosoma congolense populations and experimental infections can be profiled from deep sequence data with a set of universal protein motifs. Genome Research 28: 1383-1394.
 
-Tihon, E. et al. (2017) Discovery and genomic analyses of hybridization between divergent lineages of Trypanosoma congolense, causative agent of Animal African Trypanosomiasis. Mol Ecol. 26(23):6524-6538. doi: 10.1111/mec.14271. Epub 2017 Aug 24.
+Tihon, E. et al. (2017) Discovery and genomic analyses of hybridization between divergent lineages of Trypanosoma congolense, causative agent of Animal African Trypanosomiasis. Mol Ecol. 26(23):6524-6538. 
