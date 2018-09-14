@@ -171,22 +171,23 @@ Usage:
 	Result images, csv files  and html file will be found in directory results/mcvtest/
 
 Installation:
--------------
+------------
+    To ensure your system has all the required dependencies and before running
+	the VAPPER code for the first time, please type:
 
-	To ensure your system has all the required dependencies and before running the VAPPER code for the first time, please type: 
-	source install.sh 
-	(You will need sudo priveleges only if the python libraries are missing) 
-	install.sh will: 
-		1. Temporarily add a path to your system PATH variable 
-		2. Check for the installation of required pyhton libraries
-		3. If the libraries are absent, it will attempt to install virtualenv, a python virtual environment. 
-		4. Then, in the virtual environment, VAPENV, it will install the required python packages.
-	
-	This only needs to be done once per installation. However, after this, and everytime the VAPPER is called, it is necessary to set
-	$PATH and the virtual environment again by typing: 
-	
-	$ source setup.sh
-	
+	source install.sh
+               
+	install.sh will:
+	  1. Temporarily add a path to your system PATH variable
+	  2. Check for the installation of transeq a required EMBOSS application
+	  3. If absent, it will download and install it.
+	  4. Then, in the virtual environment, VAPENV, it will install any required python packages.
+	   
+	   This only needs to be done once per installation. However upon each new session before calling VAPPER it will be necessary to set
+	   the $PATH and the virtual environment again by typing:
+	   
+	   $ source setup.sh
+
 
 Examples:
 -------------
