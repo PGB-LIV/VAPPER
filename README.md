@@ -87,7 +87,8 @@ Vap.py 	- parses command line parameters and selects pathways accordingly
 	
 	As well as the usual python libraries Vap.py requires seaborn version 0.8.0 for clustermaps
 	
-	USAGE
+Usage:
+-------------
 	
 	python Vap.py --help		lists the command line arguments accepted as below
 	
@@ -117,9 +118,12 @@ Vap.py 	- parses command line parameters and selects pathways accordingly
 
 	
 	
-	Example of use
+	Example of use:
+	
+	
 	
 	T.congolense Genomic pathway:
+	
 	Single sample of T.congolense from paired NGS read files. 
 	$ python Vap.py sgtest -f Test1.fastq -r Test2.fastq  
 	Result images, csv files  and html file will be found in directory results/sgtest/
@@ -149,6 +153,7 @@ Vap.py 	- parses command line parameters and selects pathways accordingly
 	Result images, csv files  and html file will be found in directory results/mttest/
 
 	T.vivax: 
+	
 	Single sample of T.vivax from paired NGS read files. 
 	$ python Vap.py svtest -s T.vivax -f Test1.fastq -r Test2.fastq  
 	Result images, csv files  and html file will be found in directory results/svtest/
@@ -192,7 +197,9 @@ phylotype relative frequncy and variation (the deviation from the mean). For T. 
 form of heatmap/dendrogram, and a CSV file with a binary matrix representing a VAP of a test sample. 
 
 Additionally, we have provided a small test contig file (to keep file size manageable). Type:
+	
 	$ python Vap.py tc_test -con test_data/Tc_contigs.fa
+	
 The results will be found in results/tc_test.
 
 	
