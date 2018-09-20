@@ -58,6 +58,7 @@ provided for comparison.
 
 Instructions:
 -------------
+Requires Python 2.7
 
 Vap.py 	- parses command line parameters and selects pathways accordingly 
 	imports files 
@@ -74,7 +75,7 @@ Vap.py 	- parses command line parameters and selects pathways accordingly
 		data/congodata_deviationfromthemean.csv - as above but holding the deviation from the mean frequency 
 		
 	The python program Vap.py uses the following packages to analyze the isolates.
-	Please ensure that these are installed and available to the python environment
+	Please ensure that these are installed and available to the python environment (see Installation below)
 	
 	package				version used		website
 	velvet				1.2.10				https://www.ebi.ac.uk/~zerbino/velvet/
@@ -86,7 +87,25 @@ Vap.py 	- parses command line parameters and selects pathways accordingly
 	blast				2.7.1               https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download
 	
 	As well as the usual python libraries Vap.py requires seaborn version 0.8.0 for clustermaps
-	
+
+Installation:
+------------
+    To ensure your system has all the required dependencies and before running
+	the VAPPER code for the first time, please type:
+
+	source install.sh
+               
+	install.sh will:
+	  1. Temporarily add a path to your system PATH variable
+	  2. Check for the installation of transeq a required EMBOSS application
+	  3. If absent, it will download and install it.
+	  4. Then, in the virtual environment, VAPENV, it will install any required python packages.
+	   
+	   This only needs to be done once per installation. However upon each new session before calling VAPPER it will be necessary to set
+	   the $PATH and the virtual environment again by typing:
+	   
+	   $ source setup.sh
+  
 Usage:
 -------------
 	
@@ -169,24 +188,6 @@ Usage:
 	Multiple sample of T.vivax from several contigs file (*.fa) placed in directory mycdata 
 	$ python Vap.py mcvtest -s T.vivax -cdir mycdata 
 	Result images, csv files  and html file will be found in directory results/mcvtest/
-
-Installation:
-------------
-    To ensure your system has all the required dependencies and before running
-	the VAPPER code for the first time, please type:
-
-	source install.sh
-               
-	install.sh will:
-	  1. Temporarily add a path to your system PATH variable
-	  2. Check for the installation of transeq a required EMBOSS application
-	  3. If absent, it will download and install it.
-	  4. Then, in the virtual environment, VAPENV, it will install any required python packages.
-	   
-	   This only needs to be done once per installation. However upon each new session before calling VAPPER it will be necessary to set
-	   the $PATH and the virtual environment again by typing:
-	   
-	   $ source setup.sh
 
 
 Examples:
