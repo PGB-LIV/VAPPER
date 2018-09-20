@@ -315,6 +315,7 @@ def vivax_assemble(dict):
     current_df = addToCurrentData(cogPresence_df,dict['name'])  # load in Tvdatabase and add cogPresence column to it.
     createClusterMap(current_df, dict['name'],dict['html_resource'],dict['pdf'])
     createHTML(dict['name'],dict['html_file'],dict['html_resource'])
+    print("Placing results in " + dict['html_resource'])
 
 def test_cluster(dict):
     print ("name: %s",dict['name'])
@@ -338,6 +339,7 @@ def vivax_contigs(dict):
     current_df = addToCurrentData(cogPresence_df,dict['name'])  # load in Tvdatabase and add cogPresence column to it.
     createClusterMap(current_df, dict['name'], dict['html_resource'], dict['pdf'])
     createHTML(dict['name'],dict['html_file'],dict['html_resource'])
+    print("Placing results in " + dict['html_resource'])
 
 if __name__ == "__main__":
     print("ERROR: Tryp_V.py should only be called from within VAp.py")
