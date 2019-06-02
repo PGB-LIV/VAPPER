@@ -24,7 +24,7 @@ import Tryp_T
 import Tryp_V
 import Tryp_V_T
 import matplotlib as mpl
-#mpl.use('Agg')
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 import glob
@@ -235,7 +235,7 @@ def createMultiStackedBar(name,relfreqLists,strain,pdf,html_resource):
     plt.savefig(html_resource + "/stackedbar.png")
     if pdf == 'PDF_Yes':
         plt.savefig(html_resource + "/stackedbar.pdf")
-    plt.show()
+    #plt.show()
 
 
 
@@ -516,72 +516,7 @@ def multi_V_T(tdict):
 
 
 if __name__ == "__main__":
-    dict = {'name': 0, 'pdf': 4,'directory': 1,'html_file': 2, 'html_resource': 3}
-    args = ['multiV', 'myvcdata', 'multi_v_', 'results', 'pdf_No']
-    #multi_V_Assembly(args, dict)
-    multi_V_Contigs(args,dict)
+    print("Error: Must be called from Vap.py")
     sys.exit()
-
-
-    cogList = []
-    nameList = []
-    name = "V_Multi"
-    jfname = "TestV_cogspresent.csv"
-    df = pd.read_csv(jfname)
-    cogList.append(df)
-    nameList.append("TestV")
-    jfname = "Test2_cogspresent.csv"
-    df = pd.read_csv(jfname)
-    cogList.append(df)
-    nameList.append("Test 2")
-    jfname = "Test3_cogspresent.csv"
-    df = pd.read_csv(jfname)
-    cogList.append(df)
-    nameList.append("Test 3")
-    jfname = "Test4_cogspresent.csv"
-    df = pd.read_csv(jfname)
-    cogList.append(df)
-    nameList.append("Test 4")
-    tv_df = addtoCurrentDatabase(nameList,cogList)
-    Tryp_V.create_V_MultiClusterMap(tv_df, nameList, name, 'results', pdf=False)
-    save_V_ListsToCSV(name,nameList,cogList,"results")
-    Tryp_V.create_V_MultiHTML(name, name+".html", "results")
-    sys.exit()
-
-    """
-    dict = {'name': 0, 'pdf': 1, 'strain': 2, 'directory':3,'html_file': 4,'html_resource': 5}
-    args = ['MultiT', 'pdf_No', 'Tc148','mytdata', 'htmlfile', 'results']
-    multi_T_process(args, dict)
-
-    w1 = ['test_1', 0.07532571, 0.05900545, 0.009601452, 0.042357532, 0.01236219, 0.001675663, 0.04109726,
-          0.097464248, 0.057491666, 0.05826875, 0.279457473, 0.070004772, 0.065329007, 0.085361298,
-          0.045197529]
-    w2 = ['test_2', 0.07532571, 0.05900545, 0.009601452, 0.042357532, 0.01236219, 0.001675663, 0.04109726,
-          0.097464248, 0.057491666, 0.05826875, 0.279457473, 0.070004772, 0.065329007, 0.085361298,
-          0.045197529]
-    w3 = ['test_3', 0.07532571, 0.05900545, 0.009601452, 0.042357532, 0.01236219, 0.001675663, 0.04109726,
-          0.097464248, 0.057491666, 0.05826875, 0.279457473, 0.070004772, 0.065329007, 0.085361298,
-          0.045197529]
-    w4 = ['test_3', 0.07532571, 0.05900545, 0.009601452, 0.042357532, 0.01236219, 0.001675663, 0.04109726,
-          0.097464248, 0.057491666, 0.05826875, 0.279457473, 0.070004772, 0.065329007, 0.085361298,
-          0.045197529]
-    relWeightLists = [w1,w2,w3,w4]
-    createMultiStackedBar('T_Test', relWeightLists, 'Tc148', 'PDF_Yes', 'results')
-    createHTML_T('T_test','T_Test.html','results',relWeightLists)
-"""
-
-#    dict = {'name': 0, 'pdf': 8, 'kmers': 3, 'inslen': 4, 'covcut': 5, 'directory': 1, 'reverse': 2,
-#               'html_file': 6, 'htmlresource': 7}
-#    args = ['multi_','myadata','','65','400','5','multi_','results','pdf_No']
-#    multi_G_Assembly(args,dict)
-#    args = ['multi_', 'myadata', 'multi_', 'results', 'pdf_No']
-#    dict = {'name': 0, 'pdf': 4, 'directory': 1, 'html_file': 2, 'htmlresource': 3}
-#    multi_G_contigs(args,dict)
-
-#mypath = "mydata"
-#findpairedReadFiles(mypath)
-
-
-
 
 

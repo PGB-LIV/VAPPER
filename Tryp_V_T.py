@@ -24,8 +24,8 @@ import re
 import os
 import sys
 import shutil
-# import matplotlib as mpl
-# mpl.use('Agg')
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -350,7 +350,7 @@ def doMultiBarChart(tdict, composite_df):       #array of multiple sum2_dfs
     plt.savefig(tdict['html_resource'] + tdict['name']+"_phylotypes.png")
     if tdict['pdf'] == 'PDF_Yes':
         plt.savefig(tdict['html_resource'] + tdict['name']+"phylotypes.pdf")
-    plt.show()
+    #plt.show()
     pass
 
 
