@@ -298,7 +298,6 @@ def transcriptomicProcess(dict):
     relFreqList = relativeFrequencyTable(countList,dict['name'],dict['html_resource'])
     relWeightList = weightedFrequencyTable(weightList,dict['name'],dict['html_resource'])
     createStackedBar(dict['name'],relWeightList, dict['strain'],dict['pdf'],dict['html_resource'])
-    print("Placing results in " + dict['html_resource'])
     createHTML(dict['name'],dict['html_file'],dict['html_resource'], relFreqList, relWeightList)
 
 if __name__ == "__main__":

@@ -319,7 +319,7 @@ def multi_G_Assembly(dict):
     saveListsToCSV(dict['name'],freqLists,devLists,dict['html_resource'])
     dotheplots(dict['name'],freqLists,devLists,dict['pdf'],dict['html_resource'])
     createMultiHTML(dict['name'],dict['html_file'],dict['html_resource'], freqLists,devLists)  # assumes imgs are heatmap.png, dheatmap.png, vapPCA.png and already in htmlresource
-    print("Placing results in " + dict['html_resource'])
+
 
 
 
@@ -345,7 +345,7 @@ def multi_G_contigs(dict):
     saveListsToCSV(dict['name'],freqLists,devLists,dict['html_resource'])
     dotheplots(dict['name'],freqLists,devLists,dict['pdf'],dict['html_resource'])
     createMultiHTML(dict['name'], dict['name']+".html",dict['html_resource'], freqLists,devLists)  # assumes imgs are heatmap.png, dheatmap.png, vapPCA.png and already in htmlresource
-    print("Placing results in " + dict['html_resource'])
+
 
 def multi_T_process(dict):
     relFreqLists = []
@@ -375,7 +375,7 @@ def multi_T_process(dict):
     saveTransListsToCSV(dict['name'],relFreqLists,relWeightLists,dict['html_resource'])
     createMultiStackedBar(dict['name'],relWeightLists, dict['strain'],dict['pdf'],dict['html_resource'])
     createHTML_T(dict['name'],dict['name']+".html", dict['html_resource'], relWeightLists)
-    print("Placing results in " + dict['html_resource'])
+
 
 def save_V_ListsToCSV(name, nameList, cogList, htmlresource):
     df_cog = cogList[0]  # get the first...
@@ -441,7 +441,6 @@ def multi_V_Contigs(dict):
     Tryp_V.create_V_MultiClusterMap(tv_df, tmpnameList, name, htmlpath, pdf=False)
     save_V_ListsToCSV(name, tmpnameList, cog_presenceList, htmlpath)
     Tryp_V.create_V_MultiHTML(name, name + ".html", htmlpath)
-    print("Placing results in " + dict['html_resource'])
     return
 
 
@@ -480,7 +479,6 @@ def multi_V_Assembly(dict):
     Tryp_V.create_V_MultiClusterMap(tv_df, tmpnameList, name, htmlpath, pdf=False)
     save_V_ListsToCSV(name, tmpnameList, cog_presenceList, htmlpath)
     Tryp_V.create_V_MultiHTML(name, name + ".html", htmlpath)
-    print("Placing results in " + dict['html_resource'])
     return
 
 
@@ -518,6 +516,72 @@ def multi_V_T(tdict):
 
 
 if __name__ == "__main__":
-    print("ERROR: Tryp_Multi.py should only be called from within VAp.py")
+    dict = {'name': 0, 'pdf': 4,'directory': 1,'html_file': 2, 'html_resource': 3}
+    args = ['multiV', 'myvcdata', 'multi_v_', 'results', 'pdf_No']
+    #multi_V_Assembly(args, dict)
+    multi_V_Contigs(args,dict)
     sys.exit()
+
+
+    cogList = []
+    nameList = []
+    name = "V_Multi"
+    jfname = "TestV_cogspresent.csv"
+    df = pd.read_csv(jfname)
+    cogList.append(df)
+    nameList.append("TestV")
+    jfname = "Test2_cogspresent.csv"
+    df = pd.read_csv(jfname)
+    cogList.append(df)
+    nameList.append("Test 2")
+    jfname = "Test3_cogspresent.csv"
+    df = pd.read_csv(jfname)
+    cogList.append(df)
+    nameList.append("Test 3")
+    jfname = "Test4_cogspresent.csv"
+    df = pd.read_csv(jfname)
+    cogList.append(df)
+    nameList.append("Test 4")
+    tv_df = addtoCurrentDatabase(nameList,cogList)
+    Tryp_V.create_V_MultiClusterMap(tv_df, nameList, name, 'results', pdf=False)
+    save_V_ListsToCSV(name,nameList,cogList,"results")
+    Tryp_V.create_V_MultiHTML(name, name+".html", "results")
+    sys.exit()
+
+    """
+    dict = {'name': 0, 'pdf': 1, 'strain': 2, 'directory':3,'html_file': 4,'html_resource': 5}
+    args = ['MultiT', 'pdf_No', 'Tc148','mytdata', 'htmlfile', 'results']
+    multi_T_process(args, dict)
+
+    w1 = ['test_1', 0.07532571, 0.05900545, 0.009601452, 0.042357532, 0.01236219, 0.001675663, 0.04109726,
+          0.097464248, 0.057491666, 0.05826875, 0.279457473, 0.070004772, 0.065329007, 0.085361298,
+          0.045197529]
+    w2 = ['test_2', 0.07532571, 0.05900545, 0.009601452, 0.042357532, 0.01236219, 0.001675663, 0.04109726,
+          0.097464248, 0.057491666, 0.05826875, 0.279457473, 0.070004772, 0.065329007, 0.085361298,
+          0.045197529]
+    w3 = ['test_3', 0.07532571, 0.05900545, 0.009601452, 0.042357532, 0.01236219, 0.001675663, 0.04109726,
+          0.097464248, 0.057491666, 0.05826875, 0.279457473, 0.070004772, 0.065329007, 0.085361298,
+          0.045197529]
+    w4 = ['test_3', 0.07532571, 0.05900545, 0.009601452, 0.042357532, 0.01236219, 0.001675663, 0.04109726,
+          0.097464248, 0.057491666, 0.05826875, 0.279457473, 0.070004772, 0.065329007, 0.085361298,
+          0.045197529]
+    relWeightLists = [w1,w2,w3,w4]
+    createMultiStackedBar('T_Test', relWeightLists, 'Tc148', 'PDF_Yes', 'results')
+    createHTML_T('T_test','T_Test.html','results',relWeightLists)
+"""
+
+#    dict = {'name': 0, 'pdf': 8, 'kmers': 3, 'inslen': 4, 'covcut': 5, 'directory': 1, 'reverse': 2,
+#               'html_file': 6, 'htmlresource': 7}
+#    args = ['multi_','myadata','','65','400','5','multi_','results','pdf_No']
+#    multi_G_Assembly(args,dict)
+#    args = ['multi_', 'myadata', 'multi_', 'results', 'pdf_No']
+#    dict = {'name': 0, 'pdf': 4, 'directory': 1, 'html_file': 2, 'htmlresource': 3}
+#    multi_G_contigs(args,dict)
+
+#mypath = "mydata"
+#findpairedReadFiles(mypath)
+
+
+
+
 

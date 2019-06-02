@@ -304,7 +304,6 @@ def assemble(dict):
     relativeFrequencyHeatMap(dict['name'], myFreqList,dict['pdf'], dict['html_resource'])
     deviationFromMeanHeatMap(dict['name'], myDevList,dict['pdf'], dict['html_resource'])
     prepAndPlotPCA(dict['name'], myFreqList,dict['pdf'], dict['html_resource'])
-    print("Placing results in "+dict['html_resource'])
     createHTML(dict['name'], dict['html_file'], myFreqList, myDevList)  # assumes imgs are heatmap.png, dheatmap.png, vapPCA.png and already in htmlresource
 
 def contigs(dict):
@@ -317,7 +316,6 @@ def contigs(dict):
     relativeFrequencyHeatMap(dict['name'], myFreqList, dict['pdf'], dict['html_resource'])
     deviationFromMeanHeatMap(dict['name'], myDevList, dict['pdf'], dict['html_resource'])
     prepAndPlotPCA(dict['name'], myFreqList,dict['pdf'],dict['html_resource'])
-    print("Placing results in " + dict['html_resource'])
     createHTML(dict['name'],dict['html_file'], myFreqList,myDevList)  # assumes imgs are heatmap.png, dheatmap.png, vapPCA.png and already in htmlresource
 
 
