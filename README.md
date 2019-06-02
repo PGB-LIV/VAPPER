@@ -1,4 +1,4 @@
-# VAPPER
+# VAPPER V1.1.0
 Variant Antigen Profiling for Trypanosoma congolense and Trypanosoma vivax
 
 Introduction:
@@ -49,22 +49,31 @@ their abundance. It then searches for evidence of each phylotype based on hidden
 form and a bar chart for comparison.
 
 T.vivax:
+
+T.vivax Genomic Method 
 The approach for T. vivax is quite different, it relies on the presence/absence of clusters of orthologs 
 (COGs). It takes paired sequencing read files in fastq format and outputs a binary matrix of the 
 presence/absence of each COG/gene for a given sample.
 The results compare this matrix with a database of 27+ isolates; a heatmap and dendrogram are 
 provided for comparison.
 
+T.vivax Transcriptomic Method 
+This method takes two NGS paired reads, maps the transcripts against a user supplied reference file and
+then estimates the trancript aboundance (using samtools and cufflinks). The output is then binned into 
+175 predefined phylotypes based on their greatest blastx similarity (this table is available in the results). A pident of less than 70% is considered unidentified. 
+The results provide a tabular and graphical phylotype profile of the sample(s)   
 
 Instructions:
 -------------
+Requires Python 2.7
 
 Vap.py 	- parses command line parameters and selects pathways accordingly 
 	imports files 
 		Tryp_G.py	- the T.congolense genomic pathway   	 
 		Tryp_T.py	- the T.congolense transcriptomic pathway
 		Tryp_V.py	- the T.vivax analysis via COG assessment
-		Tryp_Multi.py	- manages multiple samples of the above three parthways
+		Tryp_V_T.py - the T.vivax transcriptomic analysis
+		Tryp_Multi.py	- manages multiple samples of the above four pathways
         
 	Requires the Data directory for strain comparisons and geographical origins
 		data/Motifs	- the hmm files for the 15 phylotypes searched for by hmmer
@@ -74,7 +83,7 @@ Vap.py 	- parses command line parameters and selects pathways accordingly
 		data/congodata_deviationfromthemean.csv - as above but holding the deviation from the mean frequency 
 		
 	The python program Vap.py uses the following packages to analyze the isolates.
-	Please ensure that these are installed and available to the python environment
+	Please ensure that these are installed and available to the python environment (see Installation below)
 	
 	package				version used		website
 	velvet				1.2.10				https://www.ebi.ac.uk/~zerbino/velvet/
@@ -86,7 +95,25 @@ Vap.py 	- parses command line parameters and selects pathways accordingly
 	blast				2.7.1               https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download
 	
 	As well as the usual python libraries Vap.py requires seaborn version 0.8.0 for clustermaps
-	
+
+Installation:
+------------
+    To ensure your system has all the required dependencies and before running
+	the VAPPER code for the first time, please type:
+
+	source install.sh
+               
+	install.sh will:
+	  1. Temporarily add a path to your system PATH variable
+	  2. Check for the installation of transeq a required EMBOSS application
+	  3. If absent, it will download and install it.
+	  4. Then, in the virtual environment, VAPENV, it will install any required python packages.
+	   
+	   This only needs to be done once per installation. However upon each new session before calling VAPPER it will be necessary to set
+	   the $PATH and the virtual environment again by typing:
+	   
+	   $ source setup.sh
+  
 Usage:
 -------------
 	
@@ -106,6 +133,7 @@ Usage:
 	  -s S            Species: T.congolense (default) or T.vivax
 	  -con CON        Contigs File (fasta)
 	  -t, -T          Transcriptomic Pathway
+	  -ref			  User supplied fastq reference file for T.vivax transciptomic pathway
 	  -p, -P          Export PDFs of images to results directory as well as .pngs 
 	  -strain STRAIN  Strain for Transcriptomic pathway (defaults to Tc148)
 	  -dir DIR        Directory that holds multiple paired NGS readfiles for analysis
@@ -151,7 +179,7 @@ Usage:
 	$ python Vap.py mttest -t -dir mytdata
 	Result images, csv files  and html file will be found in directory results/mttest/
 
-	T.vivax: 
+	T.vivax: Genomic Pathway
 	
 	Single sample of T.vivax from paired NGS read files. 
 	$ python Vap.py svtest -s T.vivax -f Test1.fastq -r Test2.fastq  
@@ -170,31 +198,23 @@ Usage:
 	$ python Vap.py mcvtest -s T.vivax -cdir mycdata 
 	Result images, csv files  and html file will be found in directory results/mcvtest/
 
-Installation:
-------------
-    To ensure your system has all the required dependencies and before running
-	the VAPPER code for the first time, please type:
+	T.vivax: Transcriptomic Pathway
 
-	source install.sh
-               
-	install.sh will:
-	  1. Temporarily add a path to your system PATH variable
-	  2. Check for the installation of transeq a required EMBOSS application
-	  3. If absent, it will download and install it.
-	  4. Then, in the virtual environment, VAPENV, it will install any required python packages.
-	   
-	   This only needs to be done once per installation. However upon each new session before calling VAPPER it will be necessary to set
-	   the $PATH and the virtual environment again by typing:
-	   
-	   $ source setup.sh
-
+	Single sample of T.vivax from paired NGS read files.
+	$ python Vap.py stvtest -s T.vivax -t -ref reference.fasta -f transcripts.1 - r transcripts.2 
+	Results image, html and .csv file will be found in results/stvtest/
+	
+	Multiple samples of T.Vivax from several sets of pair NGS reads placed in directory /myvdata/
+	$python Vap.py mtvtest -s T.vivax -t -ref reference.fasta -dir myvdata
+	Results image, html and .csv files will be found in results/mtvtest/
 
 Examples:
 -------------
 The directory "Example_data" contain examples of the outputs that should be expected. For  T. congolense, this includes 
 two PDF and PNG heatmaps/dendrograms; a PCA plot; and two CSV files containing the VAP of a test sample, expressed as the
-phylotype relative frequncy and variation (the deviation from the mean). For T. vivax, this includes a cluster map in the 
-form of heatmap/dendrogram, and a CSV file with a binary matrix representing a VAP of a test sample. 
+phylotype relative frequncy and variation (the deviation from the mean). For T. vivax  this includes a cluster map in the 
+form of heatmap/dendrogram, and a CSV file with a binary matrix representing a VAP of a test sample. Contained within the 
+Transcriptomic folder is the html and associated image.  
 
 Additionally, we have provided a small test contig file (to keep file size manageable). Type:
 	

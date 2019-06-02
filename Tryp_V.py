@@ -166,8 +166,8 @@ def create_V_MultiClusterMap(tv_df,nameList,name,html_path,pdf):
             "showing the \ncombination of present and absent diagnostic cluster of VSG orthologs " \
             "across the sample cohort. \nDendrogram reflects the relationships amongst the VSG" \
             " repertoires of each strain. " \
-            "Strains were isolated \nfrom multiple African countries as shown in the key.\nData was produced with the " \
-            "'Variant Antigen Profiler' (Silva Pereira and Jackson, 2018)."
+            "Strains were isolated \nfrom multiple African countries as shown in the key.\n" \
+            "Data was produced with VAPPER-Variant Antigen Profiler (Silva Pereira et al., 2019)."
 
     ax.text(-1.5, len(tv_df) + 8,
             title,
@@ -243,8 +243,8 @@ def createClusterMap(tv_df,name,html_path,pdf):
             "showing the \ncombination of present and absent diagnostic cluster of VSG orthologs " \
             "across the sample cohort. \nDendrogram reflects the relationships amongst the VSG" \
             " repertoires of each strain. " \
-            "Strains were isolated \nfrom multiple African countries as shown in the key.\nData was produced with the " \
-            "'Variant Antigen Profiler' (Silva Pereira and Jackson, 2018)."
+            "Strains were isolated \nfrom multiple African countries as shown in the key.\n" \
+            "Data was produced with VAPPER-Variant Antigen Profiler (Silva Pereira et al., 2019)."
 
     ax.text(-1.5, len(tv_df) + 8,
             title,
@@ -315,6 +315,7 @@ def vivax_assemble(dict):
     current_df = addToCurrentData(cogPresence_df,dict['name'])  # load in Tvdatabase and add cogPresence column to it.
     createClusterMap(current_df, dict['name'],dict['html_resource'],dict['pdf'])
     createHTML(dict['name'],dict['html_file'],dict['html_resource'])
+    print("Placing results in " + dict['html_resource'])
 
 def test_cluster(dict):
     print ("name: %s",dict['name'])
@@ -338,68 +339,9 @@ def vivax_contigs(dict):
     current_df = addToCurrentData(cogPresence_df,dict['name'])  # load in Tvdatabase and add cogPresence column to it.
     createClusterMap(current_df, dict['name'], dict['html_resource'], dict['pdf'])
     createHTML(dict['name'],dict['html_file'],dict['html_resource'])
+    print("Placing results in " + dict['html_resource'])
 
 if __name__ == "__main__":
     print("ERROR: Tryp_V.py should only be called from within VAp.py")
     sys.exit()
-    """
-    name = "test"
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    j_fname = dir_path+r"/data/vivax/geoTv.csv"
-    geo_df = pd.read_csv(j_fname)
-    geo_df.loc[len(geo_df)] =[name,name,'k']
-    #print(geo_df)
-    countryList = pd.unique(geo_df['Location'])
-    colourList = pd.unique(geo_df['colour'])
-    #
-    #for c in countryList:
-    #    colourList.append(geo_df[(geo_df['Location'] == c)]['colour'])
-
-    print(countryList)
-    print(colourList)
-    for i in range(0,len(colourList)):
-        print("country = %s, colour = %s" %(countryList[i],colourList[i]))
-        p = Patch(facecolor = str(colourList[i]),label = countryList[i])
-
-    sys.exit()
-
-
-    #assembleWithVelvet("V2_Test",'65','400', '5',"data/TviBrRp.1.clean","data/TviBrRp.2.clean")
-    #assembleWithVelvet("V2_Test",'65','400', '5',"data/Tv493.1","data/Tv493.2")
-    #blastResult_df=blastContigs("V2_Test",r"/Database/COGs.fas")
-    cogPresence_df = pd.read_csv("TestV_cogspresent.csv")
-    print(cogPresence_df)
-    current_df = addToCurrentData(cogPresence_df,"TestV")  # load in Tvdatabase and add cogPresence column to it.
-    createClusterMap(current_df, "TestV", "results","no")
-    createHTML("TestV","vTest.html","results")
-    sys.exit()
-
-    blastResult_df=blastContigs("Tv493",r"/Database/COGs.fas")
-    orthPresence_df = getCogsPresent(blastResult_df,"Tv493",r"/Database/COGlist.txt")
-
-    #binBlastResult_df=blastContigs("V2_Test",r"/Database/Bin_2.fas")
-
-    binBlastResult_df=blastContigs("Tv493",r"/Database/Bin_2.fas")
-    binPresence_df = getCogsPresent(binBlastResult_df,"Tv493",r"/Database/binlist.txt")
-    cogPresence_df = orthPresence_df.append(binPresence_df, ignore_index=True)
-    #now do the next bit?
-    current_df = addToCurrentData(cogPresence_df)  # load in Tvdatabase and add cogPresence column to it.
-    createClusterMap(current_df,'Test',dict['html_resource'] ,dict['pdf'])
-
-
-    #print(cogPresence_df)
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    fname = dir_path+r"/results/V2_TestPresence.csv"
-    #fnameb = dir_path+r"/results/V2_Test_blastOrth.csv"
-    #fnameb_bin = dir_path+r"/results/V2_Test_blastBin.csv"
-    #binBlastResult_df.to_csv(fnameb_bin)
-    #blastResult_df.to_csv(fnameb)
-
-    #cogPresence_df.to_csv(fname)
-    cogPresence_df = pd.read_csv(fname)
-
-    current_df = addToCurrentData(cogPresence_df)       #load in Tvdatabase and add cogPresence column to it.
-"""
-
-
 

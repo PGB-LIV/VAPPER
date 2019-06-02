@@ -27,6 +27,8 @@ import Tryp_G
 import Tryp_T
 import Tryp_V
 import Tryp_Multi
+import Tryp_V_T
+
 
 import argparse
 #Entry .sort out the arguments
@@ -48,7 +50,8 @@ vapperDict = {
     'reverse': "",
     'contigs':"",
     'html_file': "",
-    'html_resource':"",
+    'html_resource': "",
+    'refFastq': ""
 }
 
 
@@ -80,6 +83,9 @@ def initialiseParameters(cargs):
     vapperDict['pathway']="Genomic" #default
     if cargs['t']:
         vapperDict['pathway'] = 'Transcriptomic'
+        if cargs['ref']:
+            vapperDict['refFastq'] = cargs['ref']
+        # vapperDict['refFastq'] = "vivax_trans/Trinity.fasta"
 
     #assembly directives
     vapperDict['kmers']=str(cargs['k'])
@@ -109,24 +115,27 @@ Entry point to Vap.py
 #set up command line argument parser
 parser = argparse.ArgumentParser(description='Variant Antigen Profiler - the VAPPER.')
 parser.add_argument('name', help = "Prefix for results directory and files therein")
-parser.add_argument('-s', default= "T.congolense", help = "Species: T.congolense (default) or T.vivax")
+parser.add_argument('-s', default="T.congolense", help= "Species: T.congolense (default) or T.vivax")
 parser.add_argument('-con', help = "Contigs File (fasta)")
 parser.add_argument('-t','-T', action = 'store_true', default = False, help = "Transcriptomic Pathway")
 parser.add_argument('-p','-P', action = 'store_true', default = False, help = "Export PDFs to results directory, as well as .png")
+parser.add_argument('-ref', default="/data/Reference/Trinity.fa",
+                            help="Fastq reference file for T.vivax Transcriptomic pathway. (defaults to Trinity.fa)")
 parser.add_argument('-strain',default = "Tc148", help = "strain for Transcriptomic pathway. (defaults to Tc148)")
 parser.add_argument('-dir', help = "Directory that holds multiple paired NGS readfiles for analysis")
 parser.add_argument('-cdir', help = "Directory that holds multiple pre-assembled contigs (fasta) files for analysis")
 parser.add_argument('-f', help = "Forward NGS read file")
 parser.add_argument('-r', help = "Reverse NGS Read File")
 parser.add_argument('-k', type = int, default = 65, help = 'kmers (default = 65) as used in velvet')
-parser.add_argument('-i',type = int, default = 400, help = 'Insert Length (default = 400) as used in velvet' )
-parser.add_argument('-cov', type = int, default = 5, help = 'Coverage cut off (default = 5) as used in velvet ')
-cargs = vars(parser.parse_args())   #cargs = list of commnand line arguments
+parser.add_argument('-i',type = int, default = 400, help = 'Insert Length (default = 400) as used in velvet')
+parser.add_argument('-cov', type = int, default = 5, help = 'Coverage cut off (default = 5) as used in velvet')
+cargs = vars(parser.parse_args())  # cargs = list of commnand line arguments
 initialiseParameters(cargs)         #flushes out vapperDict with command line arguments
-#print (vapperDict)
+# print (vapperDict)
 
 #
-if vapperDict['directory'] !="":
+if vapperDict['directory'] != '':
+    # MULTIPLE SAMPLES
     print("Multiple samples indicated in directory: %s" % vapperDict['directory'])
     if vapperDict['species'] != "T.congolense":
         print("Assuming species = T.Vivax")
@@ -134,8 +143,12 @@ if vapperDict['directory'] !="":
             print("Looking for Contig files in %s" % vapperDict['directory'])
             Tryp_Multi.multi_V_Contigs(vapperDict)
         else:
-            print("Looking for paired NFS readfiles in %s" % vapperDict['directory'])
-            Tryp_Multi.multi_V_Assembly(vapperDict)
+            if vapperDict['pathway'] == 'Transcriptomic':
+                print("Looking for paired NFS readfiles in %s for Transcriptomic Analysis" % vapperDict['directory'])
+                Tryp_Multi.multi_V_T(vapperDict)
+            else:
+                print("Looking for paired NFS readfiles in %s" % vapperDict['directory'])
+                Tryp_Multi.multi_V_Assembly(vapperDict)
     else:
         print("Assuming species = T.congolense")
         if vapperDict['pathway'] == 'Transcriptomic':
@@ -152,7 +165,13 @@ if vapperDict['directory'] !="":
 else:
     #single sample version of the above
     if vapperDict['species'] != "T.congolense":
-        print("Assuming species = T.Vivax")
+        print("Assuming species = T.vivax")
+        if vapperDict['pathway'] == 'Transcriptomic':
+            print('T.vivax Transcriptomic Pathway:')
+            print("Using paired NGS readfiles %s and %s" % (vapperDict['forward'], vapperDict['reverse']))
+            Tryp_V_T.transcriptomicProcess(vapperDict)
+            sys.exit()
+
         if vapperDict['contigs']!="":
             print("Looking for Contig file: %s" % vapperDict['contigs'])
             Tryp_V.vivax_contigs(vapperDict)

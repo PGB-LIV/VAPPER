@@ -22,6 +22,7 @@ import pandas as pd
 import Tryp_G
 import Tryp_T
 import Tryp_V
+import Tryp_V_T
 import matplotlib as mpl
 #mpl.use('Agg')
 import matplotlib.pyplot as plt
@@ -93,7 +94,7 @@ def createMultiHTML(name,htmlfn,htmlresource,freqLists,devLists):
     htmlString += r"<br/>Genomic Analysis</h3>"
     htmlString += "<p style = 'margin-left:23%; margin-right:23%'>Table Legend: Variant Antigen Profiles of <i>Trypanosoma " \
                   "congolense</i> estimated as the phylotype proportion and as the deviation from the mean across the sample cohort.<br>" \
-                  "Data was produced with the 'Variant Antigen Profiler' (Silva Pereira and Jackson, 2018).</p>"
+                  "Data was produced with VAPPER-Variant Antigen Profiler (Silva Pereira et al., 2019).</p>"
     htmlString += r"<style> table, th, tr, td {border: 1px solid black; border-collapse: collapse;}</style>"
 
     header = r"<table style='width:50%;margin-left:25%;text-align:center'><tr><th>Phylotype</th>"
@@ -149,7 +150,7 @@ def createHTML_T(name,htmlfn,htmlresource,weightLists):
     htmlString += r"<br>Transcriptomic Analysis</h3></p>"
     htmlString += "<p style = 'margin-left:20%; margin-right:20%'>Table Legend: Variant Antigen Profiles of a transcriptome of <i>Trypanosoma congolense</i> estimated as phylotype proportion. " \
                   "Weighted frequency refers to the phylotype proportion based transcript abundance. " \
-                  "Data was produced with the 'Variant Antigen Profiler' (Silva Pereira and Jackson, 2018).</p> "
+                  "Data was produced with VAPPER-Variant Antigen Profiler (Silva Pereira et al., 2019).</p> "
     htmlString += r"<style> table, th, tr, td {border: 1px solid black; border-collapse: collapse;}</style>"
 
 
@@ -222,7 +223,7 @@ def createMultiStackedBar(name,relfreqLists,strain,pdf,html_resource):
     plt.legend(plots[::-1],['p15','p14','p13','p12','p11','p10','p9','p8','p7','p6','p5','p4','p3','p2','p1'], loc = (0.975,0.0125))
     title = "Figure Legend: The transcriptomic Variant Antigen Profile of $\itTrypanosoma$ $\itcongolense$ estimated as phylotype " \
             "proportion adjusted for transcript abundance and the reference genomic Variant Antigen Profile. " \
-            "\nData was produced with the 'Variant Antigen Profiler' (Silva Pereira and Jackson, 2018)."
+            "\nData was produced with VAPPER-Variant Antigen Profiler (Silva Pereira et al., 2019)."
     #plt.title(title, wrap="True")
     #plt.text(-0.2, -0.05, title, va="top", transform=ax.transAxes, wrap="True")
     plt.text(-0.3, -0.15, title, va="top", wrap="True")
@@ -268,7 +269,7 @@ def dotheplots(tmpname,freqLists,devLists,pdf,htmlresource):
     title = "Variant Antigen Profiles of $\itTrypanosoma$ $\itcongolense$ estimated as the phylotype proportion across the\nsample cohort. "
     title += "Dendrogram reflects the relationships amongst the VSG repertoires of each strain. "
     title += "Strains\nwere isolated from multiple African countries as described in Silva Pereira et al. (2018)."
-    title += "\nData was produced with the 'Variant Antigen Profiler' (Silva Pereira and Jackson, 2018)."
+    title += "\nData was produced with VAPPER-Variant Antigen Profiler (Silva Pereira et al., 2019)."
     ax.text(-0.15, -0.05, title, va="top", wrap="True", transform=ax.transAxes)
     plt.savefig(htmlresource + "/heatmap.png", bbox_inches='tight')
     if pdf == 'PDF_Yes':
@@ -282,7 +283,7 @@ def dotheplots(tmpname,freqLists,devLists,pdf,htmlresource):
     title = "Variant Antigen Profiles of $\itTrypanosoma$ $\itcongolense$ expressed as the deviation from the mean phylotypes "
     title += "\nproportions of the sample cohort. Dendrogram reflects the relationships amongst the VSG repertoires of "
     title += "each \nstrain. Strains were isolated from multiple African countries as described in Silva Pereira et al. (2018)."
-    title += "\nData was produced with the 'Variant Antigen Profiler' (Silva Pereira and Jackson, 2018)."
+    title += "\nData was produced with VAPPER-Variant Antigen Profiler (Silva Pereira et al., 2019)."
 
     ax.text(-0.2, -0.05, title, va="top", transform=ax.transAxes, wrap="True")
     plt.savefig(htmlresource+ "/dheatmap.png", bbox_inches='tight')
@@ -318,7 +319,7 @@ def multi_G_Assembly(dict):
     saveListsToCSV(dict['name'],freqLists,devLists,dict['html_resource'])
     dotheplots(dict['name'],freqLists,devLists,dict['pdf'],dict['html_resource'])
     createMultiHTML(dict['name'],dict['html_file'],dict['html_resource'], freqLists,devLists)  # assumes imgs are heatmap.png, dheatmap.png, vapPCA.png and already in htmlresource
-
+    print("Placing results in " + dict['html_resource'])
 
 
 
@@ -344,7 +345,7 @@ def multi_G_contigs(dict):
     saveListsToCSV(dict['name'],freqLists,devLists,dict['html_resource'])
     dotheplots(dict['name'],freqLists,devLists,dict['pdf'],dict['html_resource'])
     createMultiHTML(dict['name'], dict['name']+".html",dict['html_resource'], freqLists,devLists)  # assumes imgs are heatmap.png, dheatmap.png, vapPCA.png and already in htmlresource
-
+    print("Placing results in " + dict['html_resource'])
 
 def multi_T_process(dict):
     relFreqLists = []
@@ -374,7 +375,7 @@ def multi_T_process(dict):
     saveTransListsToCSV(dict['name'],relFreqLists,relWeightLists,dict['html_resource'])
     createMultiStackedBar(dict['name'],relWeightLists, dict['strain'],dict['pdf'],dict['html_resource'])
     createHTML_T(dict['name'],dict['name']+".html", dict['html_resource'], relWeightLists)
-
+    print("Placing results in " + dict['html_resource'])
 
 def save_V_ListsToCSV(name, nameList, cogList, htmlresource):
     df_cog = cogList[0]  # get the first...
@@ -440,6 +441,7 @@ def multi_V_Contigs(dict):
     Tryp_V.create_V_MultiClusterMap(tv_df, tmpnameList, name, htmlpath, pdf=False)
     save_V_ListsToCSV(name, tmpnameList, cog_presenceList, htmlpath)
     Tryp_V.create_V_MultiHTML(name, name + ".html", htmlpath)
+    print("Placing results in " + dict['html_resource'])
     return
 
 
@@ -478,76 +480,44 @@ def multi_V_Assembly(dict):
     Tryp_V.create_V_MultiClusterMap(tv_df, tmpnameList, name, htmlpath, pdf=False)
     save_V_ListsToCSV(name, tmpnameList, cog_presenceList, htmlpath)
     Tryp_V.create_V_MultiHTML(name, name + ".html", htmlpath)
+    print("Placing results in " + dict['html_resource'])
     return
 
 
-if __name__ == "__main__":
-    dict = {'name': 0, 'pdf': 4,'directory': 1,'html_file': 2, 'html_resource': 3}
-    args = ['multiV', 'myvcdata', 'multi_v_', 'results', 'pdf_No']
-    #multi_V_Assembly(args, dict)
-    multi_V_Contigs(args,dict)
-    sys.exit()
-
-
-    cogList = []
+def multi_V_T(tdict):
+    sum2_dfs = []
+    oldname = tdict['name']
     nameList = []
-    name = "V_Multi"
-    jfname = "TestV_cogspresent.csv"
-    df = pd.read_csv(jfname)
-    cogList.append(df)
-    nameList.append("TestV")
-    jfname = "Test2_cogspresent.csv"
-    df = pd.read_csv(jfname)
-    cogList.append(df)
-    nameList.append("Test 2")
-    jfname = "Test3_cogspresent.csv"
-    df = pd.read_csv(jfname)
-    cogList.append(df)
-    nameList.append("Test 3")
-    jfname = "Test4_cogspresent.csv"
-    df = pd.read_csv(jfname)
-    cogList.append(df)
-    nameList.append("Test 4")
-    tv_df = addtoCurrentDatabase(nameList,cogList)
-    Tryp_V.create_V_MultiClusterMap(tv_df, nameList, name, 'results', pdf=False)
-    save_V_ListsToCSV(name,nameList,cogList,"results")
-    Tryp_V.create_V_MultiHTML(name, name+".html", "results")
+    Tryp_V_T.uploadUserReferenceFastq(tdict['refFastq'])
+    readFileList = findpairedReadFiles(tdict['directory'])  # get readfile pairs from mypath
+    n = int(len(readFileList) / 2)
+    for j in range(n):
+        tdict['forward'] = readFileList[j * 2]
+        tdict['reverse'] = readFileList[j * 2 + 1]
+        tmpname = tdict['forward'].split('/')
+        tmpname = tmpname[-1]
+        tmpname = tmpname.split('.')[0]
+        print('tmpname = %s' % (tmpname))
+        nameList.append(tmpname)
+        tdict['name'] = tmpname
+        Tryp_V_T.transcriptMapping(tdict['name'], tdict['refFastq'], tdict['forward'], tdict['reverse'])  # uses bowtie
+        Tryp_V_T.processSamFiles(tdict['name'])  # uses samtools
+        Tryp_V_T.transcriptAbundance(tdict['name'])  # uses cufflinks -> ?.cuff/*.*
+        Tryp_V_T.transcriptsForBlast(tdict['name'], tdict['refFastq'])  # creates name+4blast.fa
+        Tryp_V_T.blastContigs(tdict['name'], 'data/vivax/Database/Phylotype_typeseqs.fas')
+        sum_df, sum2_df = Tryp_V_T.combineFPMK(tdict)
+        sum2_dfs.append(sum2_df)
+
+    tdict['name'] = oldname
+    composite_df = Tryp_V_T.getComposite_sum2(nameList, sum2_dfs)
+    Tryp_V_T.doMultiBarChart(tdict, composite_df)
+    Tryp_V_T.createMultiHTML(tdict, composite_df)
+    print("Placing results in " + tdict['html_resource'])
+    return
+
+
+
+if __name__ == "__main__":
+    print("ERROR: Tryp_Multi.py should only be called from within VAp.py")
     sys.exit()
-
-    """
-    dict = {'name': 0, 'pdf': 1, 'strain': 2, 'directory':3,'html_file': 4,'html_resource': 5}
-    args = ['MultiT', 'pdf_No', 'Tc148','mytdata', 'htmlfile', 'results']
-    multi_T_process(args, dict)
-
-    w1 = ['test_1', 0.07532571, 0.05900545, 0.009601452, 0.042357532, 0.01236219, 0.001675663, 0.04109726,
-          0.097464248, 0.057491666, 0.05826875, 0.279457473, 0.070004772, 0.065329007, 0.085361298,
-          0.045197529]
-    w2 = ['test_2', 0.07532571, 0.05900545, 0.009601452, 0.042357532, 0.01236219, 0.001675663, 0.04109726,
-          0.097464248, 0.057491666, 0.05826875, 0.279457473, 0.070004772, 0.065329007, 0.085361298,
-          0.045197529]
-    w3 = ['test_3', 0.07532571, 0.05900545, 0.009601452, 0.042357532, 0.01236219, 0.001675663, 0.04109726,
-          0.097464248, 0.057491666, 0.05826875, 0.279457473, 0.070004772, 0.065329007, 0.085361298,
-          0.045197529]
-    w4 = ['test_3', 0.07532571, 0.05900545, 0.009601452, 0.042357532, 0.01236219, 0.001675663, 0.04109726,
-          0.097464248, 0.057491666, 0.05826875, 0.279457473, 0.070004772, 0.065329007, 0.085361298,
-          0.045197529]
-    relWeightLists = [w1,w2,w3,w4]
-    createMultiStackedBar('T_Test', relWeightLists, 'Tc148', 'PDF_Yes', 'results')
-    createHTML_T('T_test','T_Test.html','results',relWeightLists)
-"""
-
-#    dict = {'name': 0, 'pdf': 8, 'kmers': 3, 'inslen': 4, 'covcut': 5, 'directory': 1, 'reverse': 2,
-#               'html_file': 6, 'htmlresource': 7}
-#    args = ['multi_','myadata','','65','400','5','multi_','results','pdf_No']
-#    multi_G_Assembly(args,dict)
-#    args = ['multi_', 'myadata', 'multi_', 'results', 'pdf_No']
-#    dict = {'name': 0, 'pdf': 4, 'directory': 1, 'html_file': 2, 'htmlresource': 3}
-#    multi_G_contigs(args,dict)
-
-#mypath = "mydata"
-#findpairedReadFiles(mypath)
-
-
-
-
 

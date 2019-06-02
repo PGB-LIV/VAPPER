@@ -176,7 +176,7 @@ def relativeFrequencyHeatMap(name, freqList, pdf, htmlresource):
     title = "Variant Antigen Profiles of $\itTrypanosoma$ $\itcongolense$ estimated as the phylotype proportion across the\nsample cohort. "
     title += "Dendrogram reflects the relationships amongst the VSG repertoires of each strain. "
     title += "Strains\nwere isolated from multiple African countries as described in Silva Pereira et al. (2018)."
-    title += "\nData was produced with the 'Variant Antigen Profiler' (Silva Pereira and Jackson, 2018)."
+    title += "\nData was produced with VAPPER-Variant Antigen Profiler (Silva Pereira et al., 2019)."
     ax.text(-0.15,-0.05, title,va = "top",wrap = "True", transform = ax.transAxes )
 
     plt.savefig(htmlresource+"/heatmap.png",bbox_inches='tight')
@@ -201,7 +201,7 @@ def deviationFromMeanHeatMap(name,devList, pdf, htmlresource):
     title = "Variant Antigen Profiles of $\itTrypanosoma$ $\itcongolense$ expressed as the deviation from the mean phylotypes "
     title +="\nproportions of the sample cohort. Dendrogram reflects the relationships amongst the VSG repertoires of "
     title +="each \nstrain. Strains were isolated from multiple African countries as described in Silva Pereira et al. (2018)."
-    title +="\nData was produced with the 'Variant Antigen Profiler' (Silva Pereira and Jackson, 2018)."
+    title +="\nData was produced with VAPPER-Variant Antigen Profiler (Silva Pereira et al., 2019)."
     ax.text(-0.2, -0.05, title, va="top", transform=ax.transAxes, wrap="True")
     plt.savefig(htmlresource+"/dheatmap.png",bbox_inches='tight')
     if pdf == 'PDF_Yes':
@@ -251,7 +251,7 @@ def plotPCA(congo_df,pdf,htmlresource):
     title = "Principal Component Analysis of the Variant Antigen Profiles of $\itTrypanosoma$ $\itcongolense$. " \
             "The plot reflects the\nrelationships amongst the VSG repertoires of each strain. Strains are color-coded " \
             "by location of collection according\nto key. Strains were isolated from multiple African countries as described in Silva Pereira et al. (2018)."
-    title +="\nData was produced with the 'Variant Antigen Profiler' (Silva Pereira and Jackson, 2018)."
+    title +="\nData was produced with VAPPER-Variant Antigen Profiler (Silva Pereira et al., 2019)."
     tx = ax.text(-0.1, -0.07, title, va="top", transform=ax.transAxes, wrap="True")
     fig.subplots_adjust(bottom = 0.3)
     fig.savefig(htmlresource+"/vapPCA.png", bbox_extra_artists=(leg,tx), bbox_inches='tight')
@@ -266,7 +266,7 @@ def createHTML(name,htmlfn,freqList,devList):
     htmlString += name
     htmlString += r"<br/>Genomic Analysis</h3>"
     htmlString += "<p style = 'margin-left:23%; margin-right:23%'>Table Legend: Variant Antigen Profiles of <i>Trypanosoma congolense</i> estimated as the phylotype proportion and as the deviation from the mean across the sample cohort.<br>" \
-                  "Data was produced with the 'Variant Antigen Profiler' (Silva Pereira and Jackson, 2018).</p>"
+                  "Data was produced with VAPPER-Variant Antigen Profiler (Silva Pereira et al., 2019).</p>"
     htmlString += r"<style> table, th, tr, td {border: 1px solid black; border-collapse: collapse;}</style>"
 
     htmlString += r"<table style='width:50%;margin-left:25%;text-align:center'><tr><th>Phylotype</th><th>Relative Frequency</th><th>Deviation from Mean</th></tr>"
@@ -304,6 +304,7 @@ def assemble(dict):
     relativeFrequencyHeatMap(dict['name'], myFreqList,dict['pdf'], dict['html_resource'])
     deviationFromMeanHeatMap(dict['name'], myDevList,dict['pdf'], dict['html_resource'])
     prepAndPlotPCA(dict['name'], myFreqList,dict['pdf'], dict['html_resource'])
+    print("Placing results in "+dict['html_resource'])
     createHTML(dict['name'], dict['html_file'], myFreqList, myDevList)  # assumes imgs are heatmap.png, dheatmap.png, vapPCA.png and already in htmlresource
 
 def contigs(dict):
@@ -316,6 +317,7 @@ def contigs(dict):
     relativeFrequencyHeatMap(dict['name'], myFreqList, dict['pdf'], dict['html_resource'])
     deviationFromMeanHeatMap(dict['name'], myDevList, dict['pdf'], dict['html_resource'])
     prepAndPlotPCA(dict['name'], myFreqList,dict['pdf'],dict['html_resource'])
+    print("Placing results in " + dict['html_resource'])
     createHTML(dict['name'],dict['html_file'], myFreqList,myDevList)  # assumes imgs are heatmap.png, dheatmap.png, vapPCA.png and already in htmlresource
 
 

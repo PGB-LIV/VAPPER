@@ -252,7 +252,7 @@ def createStackedBar(name,freqList,strain,pdf,html_resource):
     plt.legend(plots[::-1],['p15','p14','p13','p12','p11','p10','p9','p8','p7','p6','p5','p4','p3','p2','p1'])
     title = "Figure Legend: The transcriptomic Variant Antigen Profile of $\itTrypanosoma$ $\itcongolense$ estimated as phylotype " \
             "proportion adjusted for transcript abundance and the reference genomic Variant Antigen Profile. " \
-            "\nData was produced with the 'Variant Antigen Profiler' (Silva Pereira and Jackson, 2018)."
+            "\nData was produced with VAPPER-Variant Antigen Profiler (Silva Pereira et al., 2019)."
     plt.text(-0.3, -0.15, title, va="top", wrap="True")
     plt.tight_layout(pad=1.5)
     plt.subplots_adjust(bottom = 0.3,top=0.99,left=0.125,right=0.9,hspace=0.2,wspace=0.2)
@@ -270,7 +270,7 @@ def createHTML(name,htmlfn,htmlresource,freqList,weightList):
     htmlString += r"<br>Transcriptomic Analysis</h3></p>"
     htmlString += "<p style = 'margin-left:20%; margin-right:20%'>Table Legend: Variant Antigen Profiles of a transcriptome of <i>Trypanosoma congolense</i> estimated as phylotype proportion. " \
                   "Weighted frequency refers to the phylotype proportion based transcript abundance. " \
-                  "Data was produced with the 'Variant Antigen Profiler' (Silva Pereira and Jackson, 2018).</p> "
+                  "Data was produced with VAPPER-Variant Antigen Profiler (Silva Pereira et al., 2019).</p> "
     htmlString += r"<style> table, th, tr, td {border: 1px solid black; border-collapse: collapse;}</style>"
 
     htmlString += r"<table style='width:50%;margin-left:25%;text-align:center'><tr><th>Phylotype</th><th>Relative Frequency</th><th>Weighted Frequency</th></tr>"
@@ -298,6 +298,7 @@ def transcriptomicProcess(dict):
     relFreqList = relativeFrequencyTable(countList,dict['name'],dict['html_resource'])
     relWeightList = weightedFrequencyTable(weightList,dict['name'],dict['html_resource'])
     createStackedBar(dict['name'],relWeightList, dict['strain'],dict['pdf'],dict['html_resource'])
+    print("Placing results in " + dict['html_resource'])
     createHTML(dict['name'],dict['html_file'],dict['html_resource'], relFreqList, relWeightList)
 
 if __name__ == "__main__":
