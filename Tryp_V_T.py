@@ -24,8 +24,8 @@ import re
 import os
 import sys
 import shutil
-import matplotlib as mpl
-mpl.use('Agg')
+# import matplotlib as mpl
+# mpl.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -140,7 +140,10 @@ def blastContigs(test_name,database):
         b_df = b_df.append(temp_df.iloc[[0]])
 
     b_df.sort_values(by=['qaccver'])
-    b_df.to_csv("./results/" + test_name + "/" + test_name + '_transcript.csv')
+    fdir = r"./results/" + tdict['name'] + "/"
+    if not os.path.exists(fdir):
+        os.makedirs(fdir)
+    b_df.to_csv(fdir + test_name + '_transcript.csv')
     return b_df
 
 
@@ -350,7 +353,7 @@ def doMultiBarChart(tdict, composite_df):       #array of multiple sum2_dfs
     plt.savefig(tdict['html_resource'] + tdict['name']+"_phylotypes.png")
     if tdict['pdf'] == 'PDF_Yes':
         plt.savefig(tdict['html_resource'] + tdict['name']+"phylotypes.pdf")
-    #plt.show()
+    plt.show()
     pass
 
 
