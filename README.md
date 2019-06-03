@@ -50,18 +50,18 @@ form and a bar chart for comparison.
 
 T.vivax:
 
-T.vivax Genomic Method 
-The approach for T. vivax is quite different, it relies on the presence/absence of clusters of orthologs 
-(COGs). It takes paired sequencing read files in fastq format and outputs a binary matrix of the 
-presence/absence of each COG/gene for a given sample.
-The results compare this matrix with a database of 27+ isolates; a heatmap and dendrogram are 
-provided for comparison.
+T.vivax Genomic VAP 
+The approach for T. vivax is quite different, it relies on the presence/absence of specific VSG. 
+It takes paired sequencing read files in fastq format and outputs a binary matrix of the presence/absence of each COG/gene for a given sample.
+The results compare this matrix with a database of 27+ isolates; a heatmap and dendrogram are provided for comparison.
 
-T.vivax Transcriptomic Method 
-This method takes two NGS paired reads, maps the transcripts against a user supplied reference file and
+T.vivax Transcriptomic VAP 
+This method takes two NGS paired reads, maps the transcripts against a user-supplied reference file and
 then estimates the trancript aboundance (using samtools and cufflinks). The output is then binned into 
-175 predefined phylotypes based on their greatest blastx similarity (this table is available in the results). A pident of less than 70% is considered unidentified. 
-The results provide a tabular and graphical phylotype profile of the sample(s)   
+175 predefined phylotypes based on their greatest blastx similarity (this table is available in the results). A pident of less than 70% is considered unidentified.
+The results are shown as tabular and graphical phylotype profiles.
+The user-supplied reference file should contain assembled transcripts. We advise it to be created using Trinity (Grabherr et al. 2013). 
+
 
 Instructions:
 -------------
