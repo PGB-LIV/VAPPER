@@ -24,7 +24,7 @@ import Tryp_T
 import Tryp_V
 import Tryp_V_T
 import matplotlib as mpl
-mpl.use('Agg')
+#mpl.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 import glob
@@ -235,7 +235,7 @@ def createMultiStackedBar(name,relfreqLists,strain,pdf,html_resource):
     plt.savefig(html_resource + "/stackedbar.png")
     if pdf == 'PDF_Yes':
         plt.savefig(html_resource + "/stackedbar.pdf")
-    #plt.show()
+    plt.show()
 
 
 
@@ -319,7 +319,7 @@ def multi_G_Assembly(dict):
     saveListsToCSV(dict['name'],freqLists,devLists,dict['html_resource'])
     dotheplots(dict['name'],freqLists,devLists,dict['pdf'],dict['html_resource'])
     createMultiHTML(dict['name'],dict['html_file'],dict['html_resource'], freqLists,devLists)  # assumes imgs are heatmap.png, dheatmap.png, vapPCA.png and already in htmlresource
-
+    print("Placing results in " + dict['html_resource'])
 
 
 
@@ -345,7 +345,7 @@ def multi_G_contigs(dict):
     saveListsToCSV(dict['name'],freqLists,devLists,dict['html_resource'])
     dotheplots(dict['name'],freqLists,devLists,dict['pdf'],dict['html_resource'])
     createMultiHTML(dict['name'], dict['name']+".html",dict['html_resource'], freqLists,devLists)  # assumes imgs are heatmap.png, dheatmap.png, vapPCA.png and already in htmlresource
-
+    print("Placing results in " + dict['html_resource'])
 
 def multi_T_process(dict):
     relFreqLists = []
@@ -375,7 +375,7 @@ def multi_T_process(dict):
     saveTransListsToCSV(dict['name'],relFreqLists,relWeightLists,dict['html_resource'])
     createMultiStackedBar(dict['name'],relWeightLists, dict['strain'],dict['pdf'],dict['html_resource'])
     createHTML_T(dict['name'],dict['name']+".html", dict['html_resource'], relWeightLists)
-
+    print("Placing results in " + dict['html_resource'])
 
 def save_V_ListsToCSV(name, nameList, cogList, htmlresource):
     df_cog = cogList[0]  # get the first...
@@ -441,6 +441,7 @@ def multi_V_Contigs(dict):
     Tryp_V.create_V_MultiClusterMap(tv_df, tmpnameList, name, htmlpath, pdf=False)
     save_V_ListsToCSV(name, tmpnameList, cog_presenceList, htmlpath)
     Tryp_V.create_V_MultiHTML(name, name + ".html", htmlpath)
+    print("Placing results in " + dict['html_resource'])
     return
 
 
@@ -479,6 +480,7 @@ def multi_V_Assembly(dict):
     Tryp_V.create_V_MultiClusterMap(tv_df, tmpnameList, name, htmlpath, pdf=False)
     save_V_ListsToCSV(name, tmpnameList, cog_presenceList, htmlpath)
     Tryp_V.create_V_MultiHTML(name, name + ".html", htmlpath)
+    print("Placing results in " + dict['html_resource'])
     return
 
 
@@ -502,7 +504,7 @@ def multi_V_T(tdict):
         Tryp_V_T.processSamFiles(tdict['name'])  # uses samtools
         Tryp_V_T.transcriptAbundance(tdict['name'])  # uses cufflinks -> ?.cuff/*.*
         Tryp_V_T.transcriptsForBlast(tdict['name'], tdict['refFastq'])  # creates name+4blast.fa
-        Tryp_V_T.blastContigs(tdict['name'], 'data/vivax/Database/Phylotype_typeseqs.fas')
+        Tryp_V_T.blastContigs(tdict['name'], 'data/vivax/Database/Phylotype_typeseqs.fas', oldname)
         sum_df, sum2_df = Tryp_V_T.combineFPMK(tdict)
         sum2_dfs.append(sum2_df)
 
@@ -516,7 +518,6 @@ def multi_V_T(tdict):
 
 
 if __name__ == "__main__":
-    print("Error: Must be called from Vap.py")
+    print("ERROR: Tryp_Multi.py should only be called from within VAp.py")
     sys.exit()
-
 

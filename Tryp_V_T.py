@@ -113,10 +113,11 @@ def transcriptsForBlast(name, refFastq):
             namepos = refData.find(trans_id)
             endpos = refData.find('>', namepos)
             outfile.write('>'+refData[namepos:endpos])
-
     pass
 
-def blastContigs(test_name,database):
+def blastContigs(test_name, database, old_name='old' ):
+    if old_name == 'old':
+        old_name = test_name
     db_path = database
     argString = "blastx -db "+db_path+" -query "+test_name+"_for_blast.fa -outfmt 10 -out "+test_name+"_blast.txt"
     print(argString)
@@ -140,10 +141,11 @@ def blastContigs(test_name,database):
         b_df = b_df.append(temp_df.iloc[[0]])
 
     b_df.sort_values(by=['qaccver'])
-    fdir = r"./results/" + tdict['name'] + "/"
+    fdir = r"./results/" + old_name + "/"
     if not os.path.exists(fdir):
         os.makedirs(fdir)
     b_df.to_csv(fdir + test_name + '_transcript.csv')
+    b_df.to_csv(test_name + '_transcript.csv')
     return b_df
 
 
