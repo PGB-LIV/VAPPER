@@ -85,6 +85,7 @@ def transcriptAbundance(inputname):
     os.remove(inputname+".sorted")  #remove name.sorted
     os.remove(inputname+".sorted.bai")
     os.remove(inputname+".bam")
+    os.remove(inputname+".sam")
     return
 
 def transcriptsForBlast(name, refFastq):
@@ -96,9 +97,6 @@ def transcriptsForBlast(name, refFastq):
     # used for dirty # refPath = 'Trinity.fasta' # dirty one
     track_df = pd.read_csv(name+'.cuff/genes.fpkm_tracking', sep='\t')
     names = track_df['locus']
-    # print(len(names))
-    # print(names[:5])
-
     nlist = []
     for n in range(0,len(names)):
         i = names[n].find(':')
@@ -146,6 +144,8 @@ def blastContigs(test_name, database, old_name='old' ):
         os.makedirs(fdir)
     b_df.to_csv(fdir + test_name + '_transcript.csv')
     b_df.to_csv(test_name + '_transcript.csv')
+    os.remove(test_name+"_for_blast.fa")  # remove name_for_blast_fa
+    os.remove(test_name+"_blast.txt")  # remove name_for_blast_fa
     return b_df
 
 
@@ -275,6 +275,9 @@ def combineFPMK(tdict):
 
     # print(FPKMsum2_df)
     FPKMsum2_df.to_csv('FPKM_sum2.csv') # in case more than one entry for a particular phylotype
+
+    os.remove(tdict['name']+'_transcript.csv')
+
     return FPKMsum_df, FPKMsum2_df
 
 
@@ -307,7 +310,7 @@ def getComposite_sum2(nameList,sum2_dfs):
                 w = 0
             wList.append(w)
         composite_sum2_df[nameList[i]] = wList
-    print(composite_sum2_df)
+    #print(composite_sum2_df)
     #composite_sum2_df.to_csv('composite.csv')
     return composite_sum2_df
 
@@ -407,6 +410,7 @@ def transcriptomicProcess(tdict):
     transcriptsForBlast(tdict['name'], tdict['refFastq'])       #creates name+4blast.fa
     blastContigs(tdict['name'],'data/vivax/Database/Phylotype_typeseqs.fas')
     sum_df, sum2_df = combineFPMK(tdict)
+    shutil.rmtree(tdict['name'] + '.cuff')
     doBarChart(tdict, sum2_df)
     createHTML(tdict, sum_df)
 

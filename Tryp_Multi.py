@@ -23,6 +23,7 @@ import Tryp_G
 import Tryp_T
 import Tryp_V
 import Tryp_V_T
+import shutil
 import matplotlib as mpl
 #mpl.use('Agg')
 import matplotlib.pyplot as plt
@@ -507,9 +508,11 @@ def multi_V_T(tdict):
         Tryp_V_T.blastContigs(tdict['name'], 'data/vivax/Database/Phylotype_typeseqs.fas', oldname)
         sum_df, sum2_df = Tryp_V_T.combineFPMK(tdict)
         sum2_dfs.append(sum2_df)
+        shutil.rmtree(tdict['name'] + '.cuff')
 
     tdict['name'] = oldname
     composite_df = Tryp_V_T.getComposite_sum2(nameList, sum2_dfs)
+    composite_df.to_csv(tdict['html_resource']+tdict['name']+'.csv')
     Tryp_V_T.doMultiBarChart(tdict, composite_df)
     Tryp_V_T.createMultiHTML(tdict, composite_df)
     print("Placing results in " + tdict['html_resource'])
